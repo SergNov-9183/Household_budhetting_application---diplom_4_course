@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
+import HomeFinance
+
 HFDialogWindow {
     id: root
 
@@ -10,12 +12,13 @@ HFDialogWindow {
     property int parentId
     property string parentCategoryName
 
-    windowHeight: 180
+    height: 180
+    okEnabled: editor.text.length > 0
 
     ColumnLayout {
         anchors {
             fill: parent
-            margins: 10
+            margins: Style.margins.base
         }
 
         RowLayout {
@@ -30,15 +33,9 @@ HFDialogWindow {
             }
         }
         HFLabel { text: qsTr("Имя категории: ") }
-        RowLayout {
+        HFEditText {
+            id: editor
             Layout.fillWidth: true
-
-            Item { width: 20 }
-
-            HFEditText {
-                id: editor
-                Layout.fillWidth: true
-            }
         }
     }
 

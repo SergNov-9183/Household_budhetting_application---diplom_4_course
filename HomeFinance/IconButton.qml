@@ -12,8 +12,8 @@ AbstractButton {
     property string hoveredIcon
     property string selectedIcon
 
-    implicitWidth: Style.width.base
-    implicitHeight: Style.height.base
+    implicitWidth: Style.size.icon
+    implicitHeight: Style.size.icon
     background: Item {
         Image {
             anchors.centerIn: parent

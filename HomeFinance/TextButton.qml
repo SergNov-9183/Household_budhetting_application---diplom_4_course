@@ -17,11 +17,13 @@ AbstractButton {
 
     implicitWidth: label.implicitWidth + 20
     implicitHeight: Math.max(Style.height.base, label.implicitHeight)
+    hoverEnabled: enabled
     background: Rectangle {
         color: root.isDefault
                ? root.hovered ? root.backgroundDefaultHovered : root.backgroundDefault
                : root.hovered ? root.backgroundNormalHovered : root.backgroundNormal
         radius: Style.radius.base
+        opacity: root.enabled ? Style.opacity.enabled : Style.opacity.disabled
         HFLabel {
             id: label
             anchors.centerIn: parent

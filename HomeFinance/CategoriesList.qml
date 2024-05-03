@@ -9,6 +9,8 @@ FrameItem {
 
     property alias model: listView.model
 
+    color: "#000000"
+
     ListView {
         id: listView
         anchors {
@@ -20,6 +22,7 @@ FrameItem {
             id: delegate
 
             property int level: model.level
+            property real iconWidth: Style.size.icon - 1.5 * contentSpacing
 
             Repeater {
                 model: delegate.level
@@ -43,7 +46,7 @@ FrameItem {
             }
 
             IconButton {
-                implicitWidth: Style.width.shevron
+                implicitWidth: delegate.iconWidth
                 enabled: delegate.level > 0
                 visible: delegate.hovered
                 hoveredIcon: "Rename-Hover"
@@ -52,7 +55,7 @@ FrameItem {
             }
 
             IconButton {
-                implicitWidth: Style.width.shevron
+                implicitWidth: delegate.iconWidth
                 enabled: false
                 visible: delegate.hovered
                 hoveredIcon: "Delete-Hover"
@@ -60,7 +63,7 @@ FrameItem {
             }
 
             IconButton {
-                implicitWidth: Style.width.shevron
+                implicitWidth: delegate.iconWidth
                 visible: delegate.hovered
                 hoveredIcon: "Add-Hover"
                 normalIcon: "Add"

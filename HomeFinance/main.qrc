@@ -20,5 +20,12 @@
         <file>Images/Delete-Hover.svg</file>
         <file>Images/Rename.svg</file>
         <file>Images/Rename-Hover.svg</file>
+        <file>Images/User.svg</file>
+        <file>Images/Accounts.svg</file>
+        <file>Images/Categories.svg</file>
+        <file>Images/Operations.svg</file>
+        <file>Images/Analytics.svg</file>
+        <file>Images/Settings.svg</file>
+        <file>Images/FinancialAnalysis.png</file>
     </qresource>
 </RCC>

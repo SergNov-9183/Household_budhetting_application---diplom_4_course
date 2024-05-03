@@ -6,5 +6,5 @@ import HomeFinance
 Label {
     elide: Text.ElideRight
     color: Style.colors.font
-    font: Style.fonts.n14
+    font: Style.fonts.n16
 }

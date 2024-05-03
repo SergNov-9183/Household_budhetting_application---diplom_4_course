@@ -37,6 +37,15 @@ qt_add_qml_module(appHomeFinance
     QML_FILES TextButton.qml
     QML_FILES AddCategoryDialog.qml
     QML_FILES HFEditText.qml
+    QML_FILES UserFrame.qml
+    QML_FILES BorderLine.qml
+    QML_FILES SectionList.qml
+    QML_FILES CategoriesSection.qml
+    QML_FILES SettingsSection.qml
+    QML_FILES OperationsSection.qml
+    QML_FILES AccountsSection.qml
+    QML_FILES AnalyticsSection.qml
+    QML_FILES DisableFrame.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

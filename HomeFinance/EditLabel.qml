@@ -26,7 +26,7 @@ Item {
         visible: !root.edited
     }
 
-    TextField {
+    HFEditText {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -37,35 +37,10 @@ Item {
         font: root.font
         color: root.color
         visible: root.edited
-        background: Item {
-            Rectangle {
-                id: blue
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    bottom: parent.bottom
-                }
-                height: 4
-                radius: height/2
-                color: "#40BDFF"
-            }
-            Rectangle {
-                anchors {
-                    fill: parent
-                    bottomMargin: blue.radius
-                }
-                border {
-                    width: 1
-                    color: "#2A3332"
-                }
-                color: "#1D1F1F"
-            }
-        }
         onVisibleChanged: {
            if (visible) {
                text = root.text
-               selectAll()
-               forceActiveFocus()
+               activate()
            }
         }
         onFocusChanged: {

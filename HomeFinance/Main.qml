@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import HomeFinance
 
@@ -10,43 +12,84 @@ Window {
         editorController: globalController
     }
 
-    width: 640
+    width: 840
     height: 480
     visible: true
     title: qsTr("Home Finance")
     color: Style.colors.backgroundWindow
 
-    Item {
-        id: tabBar
+    LinearGradient {
+        anchors.fill: parent
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#1C2125" }
+            GradientStop { position: 1.0; color: "#21201A" }
+        }
+    }
+
+    UserFrame {
+        id: userInfo
         anchors {
             left: parent.left
             top: parent.top
-            right: parent.right
+            margins: Style.margins.base
         }
-        height: 30
     }
 
-    CategoriesList {
+    BorderLine {
+        id: leftArea
+        anchors {
+            left: userInfo.right
+            leftMargin: Style.margins.base
+            top: parent.top
+            bottom: statusBar.top
+        }
+        isHorizontal: false
+    }
+
+    BorderLine {
+        id: userArea
         anchors {
             left: parent.left
-            top: tabBar.bottom
-            bottom: statusBar.top
-            margins: 25
+            top: userInfo.bottom
+            topMargin: Style.margins.base
+            right: leftArea.left
         }
-        width: (root.width - 60) / 2
-        model: categoriesModel.expenseCategories
-
     }
 
-    CategoriesList {
+    SectionList {
         anchors {
-            top: tabBar.bottom
+            left: parent.left
+            top: userArea.bottom
+            right: leftArea.left
+            bottom: statusBar.top
+            margins: Style.margins.base
+        }
+        onClicked: (index) => mainArea.currentIndex = index
+    }
+
+    FrameItem {
+        id: mainFrame
+        anchors {
+            left: leftArea.right
+            top: parent.top
             right: parent.right
             bottom: statusBar.top
-            margins: 25
+            margins: Style.margins.base
         }
-        width: (root.width - 60) / 2
-        model: categoriesModel.incomeCategories
+
+        StackLayout {
+            id: mainArea
+            anchors {
+                fill: parent
+                margins: Style.margins.base
+            }
+
+            AccountsSection   {}
+            OperationsSection {}
+            CategoriesSection {}
+            AnalyticsSection  {}
+            SettingsSection   {}
+        }
     }
 
     Item {
@@ -58,20 +101,15 @@ Window {
         }
         height: 30
 
-        Rectangle {
+        BorderLine {
             anchors {
                 left: parent.left
-                leftMargin: 3
                 top: parent.top
                 right: parent.right
-                rightMargin: 3
             }
-            height: 1
-            color: Style.colors.lineColor
         }
     }
 
-    AddCategoryDialog {
-        id: addCategoryWindow
-    }
+    DisableFrame { visible: addCategoryWindow.visible }
+    AddCategoryDialog { id: addCategoryWindow }
 }

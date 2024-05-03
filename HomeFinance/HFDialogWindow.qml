@@ -1,43 +1,58 @@
 import QtQuick
+import Qt5Compat.GraphicalEffects
 
 import HomeFinance
 
-MouseArea {
+Item {
     id: root
 
     default property alias contents: placeholder.data
-    property alias windowHeight: window.height
-    property alias windowWidth: window.width
     property alias okText: okButton.text
     property alias cancelText: cancelButton.text
+    property alias okEnabled: okButton.enabled
 
     signal accepted()
 
     function show() { visible = true }
     function hide() { visible = false }
 
-    anchors.fill: parent
+    anchors.centerIn: parent
+    height: 200
+    width: 400
     visible: false
-    hoverEnabled: true
 
-    Rectangle{
+    Item {
+        id: backgroundGradient
         anchors.fill: parent
-        color: "#000000"
-        opacity: 0.6
+        layer.enabled: true
+        layer.effect: OpacityMask {
+            anchors.fill: backgroundGradient
+            source: gradientFill
+            maskSource: Rectangle {
+                width: root.width
+                height: root.height
+                radius: Style.radius.window
+            }
+        }
+
+        LinearGradient {
+            id: gradientFill
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#1C2125" }
+                GradientStop { position: 1.0; color: "#21201A" }
+            }
+        }
     }
 
-
     Rectangle {
-        id: window
-        anchors.centerIn: parent
+        anchors.fill: parent
         border {
             color: "#0063B1"
-            width: 1
+            width: Style.width.border
         }
-        height: 200
-        width: 400
-        color: "#262626"
-        radius: 8
+        color: "transparent"
+        radius: Style.radius.window
 
         FrameItem {
             id: placeholder
@@ -46,7 +61,7 @@ MouseArea {
                 top: parent.top
                 right: parent.right
                 bottom: line.top
-                margins: 10
+                margins: Style.margins.base
             }
         }
 
@@ -56,7 +71,7 @@ MouseArea {
                 left: parent.left
                 right: parent.right
                 bottom: cancelButton.top
-                margins: 10
+                margins: Style.margins.base
             }
             height: 1
             color: Style.colors.lineColor
@@ -67,7 +82,7 @@ MouseArea {
             anchors {
                 right: parent.right
                 bottom: parent.bottom
-                margins: 10
+                margins: Style.margins.base
             }
             width: okButton.width
             text: qsTr("Отмена")
@@ -79,7 +94,7 @@ MouseArea {
             anchors {
                 right: cancelButton.left
                 bottom: parent.bottom
-                margins: 10
+                margins: Style.margins.base
             }
             isDefault: true
             width: Math.max(okButton.implicitWidth, cancelButton.implicitWidth)
@@ -91,12 +106,6 @@ MouseArea {
         }
     }
 
-    onClicked:         (mouse) => mouse.accepted = true
-    onDoubleClicked:   (mouse) => mouse.accepted = true
-    onPositionChanged: (mouse) => mouse.accepted = true
-    onPressAndHold:    (mouse) => mouse.accepted = true
-    onPressed:         (mouse) => mouse.accepted = true
-    onReleased:        (mouse) => mouse.accepted = true
-    onWheel:           (mouse) => mouse.accepted = true
+    Keys.onEscapePressed: root.hide()
 }
 

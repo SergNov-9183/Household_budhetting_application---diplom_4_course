@@ -11,7 +11,7 @@ TextField {
         forceActiveFocus()
     }
 
-    font: Style.fonts.n14
+    font: Style.fonts.n16
     color: Style.colors.font
     background: Item {
         Rectangle {
@@ -23,7 +23,7 @@ TextField {
             }
             height: 4
             radius: height/2
-            color: "#40BDFF"
+            color: Style.colors.focused
         }
         Rectangle {
             anchors {
@@ -31,7 +31,7 @@ TextField {
                 bottomMargin: blue.radius
             }
             border {
-                width: 1
+                width: Style.width.border
                 color: "#2A3332"
             }
             color: "#1D1F1F"
