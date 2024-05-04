@@ -1,31 +1,29 @@
-#ifndef CATEGORIESMODEL_H
-#define CATEGORIESMODEL_H
+#ifndef ACCOUNTSMODEL_H
+#define ACCOUNTSMODEL_H
 
 #include <set>
 #include <QAbstractListModel>
 #include "EditorController.h"
-#include "CategoriesProxyModel.h"
+#include "AccountsProxyModel.h"
 
-class CategoriesModel : public QAbstractListModel {
+class AccountsModel : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(EditorController* editorController READ editorController WRITE setEditorController NOTIFY editorControllerChanged)
-    Q_PROPERTY(QSortFilterProxyModel* allCategories READ allCategories CONSTANT)
-    Q_PROPERTY(QSortFilterProxyModel* incomeCategories READ incomeCategories CONSTANT)
-    Q_PROPERTY(QSortFilterProxyModel* expenseCategories READ expenseCategories CONSTANT)
+    Q_PROPERTY(QSortFilterProxyModel* accounts READ accounts CONSTANT)
 
 public:
-    enum CategoriesRoles {
+    enum AccountsRoles {
         Name = Qt::DisplayRole,
         Id =  Qt::UserRole + 1,
         Level,
-        Income,
+        Type,
         ParentId,
         IsExpanded,
         HasChildren
     };
 
-    explicit CategoriesModel(QObject* parent = nullptr);
-    ~CategoriesModel();
+    explicit AccountsModel(QObject* parent = nullptr);
+    ~AccountsModel();
 
     bool isParent(int myId, int targetId, QModelIndex& index) const;
     void findCommonParent(int leftParentId, int rightParentId, QModelIndex& leftIndex, QModelIndex& rightIndex);
@@ -46,7 +44,7 @@ private slots:
 
 private:
     struct Node {
-        Category& category;
+        Account& account;
         bool isExpanded = false;
         std::set<int> children;
     };
@@ -54,18 +52,16 @@ private:
     EditorController* editorController() const;
     void setEditorController(EditorController* value);
 
-    QSortFilterProxyModel* allCategories() const;
-    QSortFilterProxyModel* incomeCategories() const;
-    QSortFilterProxyModel* expenseCategories() const;
+    QSortFilterProxyModel* accounts() const;
 
     bool isValidIndex(int value) const;
     void disconnectController();
     void connectController();
     void invalidateFilter();
+    int level(const Account& account) const;
 
-    CategoriesProxyModel* m_allCategories = nullptr;
-    CategoriesProxyModel* m_incomeCategories = nullptr;
-    CategoriesProxyModel *m_expenseCategories = nullptr;
+    AccountsProxyModel* m_accounts = nullptr;
+
 
     QHash<int, QByteArray> m_roles;
     EditorController* m_editorController = nullptr;
@@ -73,4 +69,4 @@ private:
     std::map<int, size_t> m_mapNodes;
 };
 
-#endif // CATEGORIESMODEL_H
+#endif // ACCOUNTSMODEL_H

@@ -18,6 +18,7 @@ add_library(DataStorage SHARED
     SqlQuery.cpp SqlQuery.h
     SqlBase.h SqlBase.cpp
     SqlCategories.h SqlCategories.cpp
+    SqlAccounts.h SqlAccounts.cpp
 )
 
 target_link_libraries(DataStorage PRIVATE Common sqlite3)

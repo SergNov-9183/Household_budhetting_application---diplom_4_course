@@ -4,36 +4,10 @@
 #include <QtQuick>
 
 #include "CategoriesModel.h"
-
-static void initFonts() {
-    auto addFont = [](const QString& name) {
-        auto fontPath = QString(":/Fonts/%1.ttf").arg(name);
-        auto fontId = QFontDatabase::addApplicationFont(fontPath);
-        if (fontId < 0) {
-            qDebug() << "Failed to add font from resource: " << fontPath.toStdString().c_str();
-        }
-        else {
-            qDebug() << "Font successfully added, index: " << name.toStdString().c_str() << fontId;
-        }
-    };
-    addFont("Roboto-Regular");
-    addFont("Roboto-Bold");
-    addFont("Roboto-Medium");
-    addFont("Manrope-Bold");
-    addFont("Manrope-ExtraBold");
-    addFont("Manrope-ExtraLight");
-    addFont("Manrope-Light");
-    addFont("Manrope-Medium");
-    addFont("Manrope-Regular");
-    addFont("Manrope-SemiBold");
-}
-
+#include "AccountsModel.h"
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
-
-    initFonts();
-
     QScopedPointer<EditorController> editorController(new EditorController);
 
     const QUrl styleUrl(u"qrc:/HomeFinance/Style.qml"_qs);
@@ -41,9 +15,9 @@ int main(int argc, char *argv[]) {
 
     qmlRegisterType<EditorController>("HomeFinance", 1, 0, "EditorController");
     qmlRegisterType<CategoriesModel>("HomeFinance", 1, 0, "CategoriesModel");
+    qmlRegisterType<AccountsModel>("HomeFinance", 1, 0, "AccountsModel");
 
     QQmlApplicationEngine engine;
-
     engine.rootContext()->setContextProperty("globalController", editorController.data());
 
     const QUrl url(u"qrc:/HomeFinance/Main.qml"_qs);

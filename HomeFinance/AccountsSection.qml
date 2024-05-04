@@ -1,13 +1,23 @@
 import QtQuick
 import QtQuick.Layouts
 
+import HomeFinance
+
 Item {
     id: root
+
+    property AccountsModel accountsModel: AccountsModel {
+        editorController: globalController
+    }
+
+
     Layout.fillHeight: true
     Layout.fillWidth: true
 
-    HFLabel {
-        anchors.centerIn: parent
-        text: "AccountsSection.qml"
+    AccountsList {
+        anchors.fill: parent
+        width: root.listWidth
+        model: accountsModel.accounts
+
     }
 }

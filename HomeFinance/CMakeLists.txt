@@ -46,6 +46,11 @@ qt_add_qml_module(appHomeFinance
     QML_FILES AccountsSection.qml
     QML_FILES AnalyticsSection.qml
     QML_FILES DisableFrame.qml
+    SOURCES HFSettings.h HFSettings.cpp
+    SOURCES AccountsModel.h AccountsModel.cpp
+    SOURCES AccountsProxyModel.h AccountsProxyModel.cpp
+    QML_FILES AccountsList.qml
+    QML_FILES AddAccountDialog.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

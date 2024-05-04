@@ -9,6 +9,7 @@ add_library(Common SHARED
   Enums.h
   Utils.cpp Utils.h
   Categories.h
+  Accounts.h
 )
 
 target_compile_definitions(Common PRIVATE COMMON_LIBRARY)

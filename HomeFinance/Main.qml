@@ -1,5 +1,7 @@
+import QtCore
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
@@ -12,11 +14,52 @@ Window {
         editorController: globalController
     }
 
-    width: 840
-    height: 480
+    width: 1280
+    height: 720
+    minimumWidth: 1280
+    minimumHeight: 720
     visible: true
-    title: qsTr("Home Finance")
+    title: qsTr("Домашние финансы")
     color: Style.colors.backgroundWindow
+
+    Component.onCompleted: globalController.load()
+
+    Connections {
+        target: globalController
+        function onHasProjectChanged(value) {
+            if (value) {
+                sectionList.currentIndex = 1
+            }
+        }
+        function onNeedCreateOrOpenProject() {
+            fileDialog.open()
+        }
+    }
+
+    FileDialog {
+        id: fileDialog
+
+        property bool change: false
+
+        acceptLabel: qsTr("Открыть/Создать")
+        currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["Фыйлы приложения (*.hfproject)", "Фыйлы SQLite (*.sqlite3)", "Все файлы (*)"]
+        rejectLabel: change ? qsTr("отмена") : qsTr("Закрыть программу")
+        title: qsTr("Необходимо выбрать проект или создать новый")
+
+        function changeProject() {
+            change = true
+            open()
+        }
+
+        onAccepted: globalController.createOrOpen(selectedFile)
+        onRejected: {
+            if (!change) {
+                Qt.quit()
+            }
+        }
+    }
 
     LinearGradient {
         anchors.fill: parent
@@ -33,6 +76,7 @@ Window {
             top: parent.top
             margins: Style.margins.base
         }
+        onClicked: sectionList.currentIndex = 4
     }
 
     BorderLine {
@@ -57,6 +101,7 @@ Window {
     }
 
     SectionList {
+        id: sectionList
         anchors {
             left: parent.left
             top: userArea.bottom
@@ -110,6 +155,10 @@ Window {
         }
     }
 
-    DisableFrame { visible: addCategoryWindow.visible }
+    DisableFrame {
+        visible: !globalController.hasProject || fileDialog.visible || addCategoryWindow.visible || addAccountWindow.visible
+    }
     AddCategoryDialog { id: addCategoryWindow }
+
+    AddAccountDialog { id: addAccountWindow }
 }

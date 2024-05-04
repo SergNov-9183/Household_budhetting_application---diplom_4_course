@@ -52,6 +52,4 @@ ListView {
         }
     }
     onCurrentIndexChanged: clicked(currentIndex)
-
-    Component.onCompleted: root.currentIndex = 1
 }

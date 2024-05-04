@@ -38,7 +38,7 @@ AbstractButton {
             }
             HFLabel {
                 width: label.implicitWidth
-                text: qsTr("Sergey")
+                text: globalController.userName
                 font: Style.fonts.b14
             }
         }

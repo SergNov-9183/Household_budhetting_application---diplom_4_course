@@ -27,5 +27,6 @@
         <file>Images/Analytics.svg</file>
         <file>Images/Settings.svg</file>
         <file>Images/FinancialAnalysis.png</file>
+        <file>Images/About.svg</file>
     </qresource>
 </RCC>

@@ -22,7 +22,7 @@ CategoriesModel::CategoriesModel(QObject *parent)
 }
 
 CategoriesModel::~CategoriesModel() {
-    clearNodes();
+    disconnectController();
 }
 
 bool CategoriesModel::isParent(int myId, int targetId, QModelIndex& index) const {
@@ -106,6 +106,26 @@ QHash<int, QByteArray> CategoriesModel::roleNames() const {
     return m_roles;
 }
 
+void CategoriesModel::onPprojectLoaded() {
+    if (m_editorController) {
+        beginResetModel();
+        m_mapNodes.clear();
+        m_nodes.clear();
+        auto categories = m_editorController->categories();
+        for (auto i = 0; i < categories->size(); ++i) {
+            auto& category = categories->at(i);
+            m_nodes.push_back({ category, category.level == 0 });
+            m_mapNodes[category.id] = i;
+        }
+        for (auto i = 0; i < m_nodes.size(); ++i) {
+            if (auto parentId = m_nodes[i].category.parentId; parentId > 0) {
+                m_nodes[m_mapNodes[parentId]].children.insert(m_nodes[i].category.id);
+            }
+        }
+        endResetModel();
+    }
+}
+
 void CategoriesModel::onAppended() {
     auto index              = m_nodes.size();
     auto categories         = m_editorController->categories();
@@ -135,9 +155,9 @@ EditorController* CategoriesModel::editorController() const {
 
 void CategoriesModel::setEditorController(EditorController* value) {
     if (m_editorController != value) {
-        clearNodes();
+        disconnectController();
         m_editorController = value;
-        fillNodes();
+        connectController();
         emit editorControllerChanged(value);
     }
 }
@@ -158,28 +178,9 @@ bool CategoriesModel::isValidIndex(int value) const {
     return value >= 0 && value < m_nodes.size();
 }
 
-void CategoriesModel::fillNodes() {
+void CategoriesModel::disconnectController() {
     if (m_editorController) {
-        beginResetModel();
-        auto categories = m_editorController->categories();
-        for (auto i = 0; i < categories->size(); ++i) {
-            auto& category = categories->at(i);
-            m_nodes.push_back({ category, category.level == 0 });
-            m_mapNodes[category.id] = i;
-        }
-        for (auto i = 0; i < m_nodes.size(); ++i) {
-            if (auto parentId = m_nodes[i].category.parentId; parentId > 0) {
-                m_nodes[m_mapNodes[parentId]].children.insert(m_nodes[i].category.id);
-            }
-        }
-        endResetModel();
-        connect(m_editorController, &EditorController::categoryAppended, this, &CategoriesModel::onAppended);
-        connect(m_editorController, &EditorController::categoryRenamed, this, &CategoriesModel::onRenamed);
-    }
-}
-
-void CategoriesModel::clearNodes() {
-    if (m_editorController) {
+        disconnect(m_editorController, &EditorController::projectLoaded, this, &CategoriesModel::onPprojectLoaded);
         disconnect(m_editorController, &EditorController::categoryAppended, this, &CategoriesModel::onAppended);
         disconnect(m_editorController, &EditorController::categoryRenamed, this, &CategoriesModel::onRenamed);
     }
@@ -187,6 +188,14 @@ void CategoriesModel::clearNodes() {
     m_mapNodes.clear();
     m_nodes.clear();
     endResetModel();
+}
+
+void CategoriesModel::connectController() {
+    if (m_editorController) {
+        connect(m_editorController, &EditorController::projectLoaded, this, &CategoriesModel::onPprojectLoaded);
+        connect(m_editorController, &EditorController::categoryAppended, this, &CategoriesModel::onAppended);
+        connect(m_editorController, &EditorController::categoryRenamed, this, &CategoriesModel::onRenamed);
+    }
 }
 
 void CategoriesModel::invalidateFilter() {
