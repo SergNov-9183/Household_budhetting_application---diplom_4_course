@@ -23,7 +23,7 @@ bool DataStorage::SqlBase::lastIdIsValid() const {
 }
 
 bool DataStorage::SqlBase::readLastId() {
-    static const std::string sql = "select max(" + id_field + ") from " + m_tableName;
+    const std::string sql = "select max(" + id_field + ") from " + m_tableName;
 
     SqlQuery query(m_db);
     switch (query.executeScalar(sql, m_lastId)) {
@@ -124,6 +124,11 @@ bool DataStorage::SqlBase::update(const std::map<std::string, std::string>& data
         errorMessage = query.lastError();
         return false;
     }
+    return true;
+}
+
+bool DataStorage::SqlBase::remove(int id) {
+
     return true;
 }
 

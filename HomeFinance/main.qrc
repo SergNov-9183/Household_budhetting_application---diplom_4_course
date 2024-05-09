@@ -14,13 +14,19 @@
         <file>Images/Shevron-Down-Hover.svg</file>
         <file>Images/Shevron-Right.svg</file>
         <file>Images/Shevron-Right-Hover.svg</file>
-        <file>Images/Add.svg</file>
-        <file>Images/Add-Hover.svg</file>
-        <file>Images/Delete.svg</file>
-        <file>Images/Delete-Hover.svg</file>
+        <file>Images/Append.svg</file>
+        <file>Images/Append-Hover.svg</file>
+        <file>Images/Remove.svg</file>
+        <file>Images/Remove-Hover.svg</file>
         <file>Images/Rename.svg</file>
         <file>Images/Rename-Hover.svg</file>
+        <file>Images/Accept.svg</file>
+        <file>Images/Accept-Hover.svg</file>
+        <file>Images/Cancel.svg</file>
+        <file>Images/Cancel-Hover.svg</file>
         <file>Images/User.svg</file>
+        <file>Images/Users.svg</file>
+        <file>Images/Project.svg</file>
         <file>Images/Accounts.svg</file>
         <file>Images/Categories.svg</file>
         <file>Images/Operations.svg</file>
@@ -28,5 +34,9 @@
         <file>Images/Settings.svg</file>
         <file>Images/FinancialAnalysis.png</file>
         <file>Images/About.svg</file>
+        <file>Images/Cash.svg</file>
+        <file>Images/BankAccount.svg</file>
+        <file>Images/DebitCard.svg</file>
+        <file>Images/AppendOperation.svg</file>
     </qresource>
 </RCC>

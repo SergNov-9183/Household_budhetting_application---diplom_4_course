@@ -20,6 +20,7 @@ public:
 
     std::shared_ptr<Categories> categories() const;
     std::shared_ptr<Accounts> accounts() const;
+    std::shared_ptr<Operations> operations() const;
 
 public slots:
     void load();
@@ -39,6 +40,10 @@ signals:
     void accountAppended();
     void accountRenamed(int id);
 
+    void operationAppended();
+    void operationChanged(int id);
+    void operationDeleted(int id);
+
     void projectLoaded();
     void needCreateOrOpenProject();
 
@@ -53,6 +58,10 @@ private:
 
     void onAccountAppend() override;
     void onAccountRenamed(int id) override;
+
+    void onOperationAppend() override;
+    void onOperationChanged(int id) override;
+    void onOperationDeleted(int id) override;
 
     HFSettings* settings();
     QString userName() const;

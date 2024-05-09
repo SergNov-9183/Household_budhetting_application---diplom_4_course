@@ -8,16 +8,16 @@ CategoriesProxyModel::CategoriesProxyModel(CategoryType categoryType, QObject *p
 void CategoriesProxyModel::shevronClisked(int id) {
     if (auto model = qobject_cast<CategoriesModel *>(sourceModel())) {
         model->shevronClisked(id);
-        invalidateFilter();
+        invalidateData();
     }
 }
 
-void CategoriesProxyModel::invalidateFilter() {
-    QSortFilterProxyModel::invalidateFilter();
+void CategoriesProxyModel::invalidateData() {
+    invalidateFilter();
 }
 
 bool CategoriesProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const {
-    auto index  = sourceModel()->index(source_row, 0, source_parent);
+    auto index  = sourceModel()->index(source_row, 0);
     auto income = sourceModel()->data(index, CategoriesModel::CategoriesRoles::Income).toBool();
     if ((m_categoryType == CategoryType::Income && !income) ||
         (m_categoryType == CategoryType::Expense && income)) {
@@ -32,22 +32,30 @@ bool CategoriesProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
 
 bool CategoriesProxyModel::lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const {
     if (auto model = qobject_cast<CategoriesModel*>(sourceModel())) {
-        auto leftLevel  = sourceModel()->data(source_left, CategoriesModel::CategoriesRoles::Level).toInt();
-        auto rightLevel = sourceModel()->data(source_right, CategoriesModel::CategoriesRoles::Level).toInt();
-        if (leftLevel != rightLevel) {
-            QModelIndex index;
-            auto leftId  = sourceModel()->data(source_left, CategoriesModel::CategoriesRoles::Id).toInt();
-            auto rightId = sourceModel()->data(source_right, CategoriesModel::CategoriesRoles::Id).toInt();
-            return leftLevel > rightLevel
-                       ? model->isParent(leftId, rightId, index) ? false : QSortFilterProxyModel::lessThan(index, source_right)
-                       : model->isParent(rightId, leftId, index) ? true : QSortFilterProxyModel::lessThan(source_left, index);
-        }
         auto leftParentId  = sourceModel()->data(source_left, CategoriesModel::CategoriesRoles::ParentId).toInt();
         auto rightParentId = sourceModel()->data(source_right, CategoriesModel::CategoriesRoles::ParentId).toInt();
         if (leftParentId != rightParentId) {
-            QModelIndex leftIndex;
-            QModelIndex rightIndex;
-            model->findCommonParent(leftParentId, rightParentId, leftIndex, rightIndex);
+            auto leftLevel  = sourceModel()->data(source_left, CategoriesModel::CategoriesRoles::Level).toInt();
+            auto rightLevel = sourceModel()->data(source_right, CategoriesModel::CategoriesRoles::Level).toInt();
+            auto leftIndex  = source_left;
+            auto rightIndex = source_right;
+            auto leftId     = sourceModel()->data(source_left, CategoriesModel::CategoriesRoles::Id).toInt();
+            auto rightId    = sourceModel()->data(source_right, CategoriesModel::CategoriesRoles::Id).toInt();
+            if (leftLevel != rightLevel) {
+                if (leftLevel > rightLevel) {
+                    if (model->isParent(leftId, rightId, leftIndex)) {
+                        return false;
+                    }
+                }
+                else {
+                    if (model->isParent(rightId, leftId, rightIndex)) {
+                        return true;
+                    }
+                }
+            }
+            leftId  = sourceModel()->data(leftIndex, CategoriesModel::CategoriesRoles::Id).toInt();
+            rightId = sourceModel()->data(rightIndex, CategoriesModel::CategoriesRoles::Id).toInt();
+            model->findCommonParent(leftId, rightId, leftIndex, rightIndex);
             return QSortFilterProxyModel::lessThan(leftIndex, rightIndex);
         }
     }

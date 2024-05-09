@@ -4,6 +4,7 @@
 #include <IDataManager.h>
 #include "Categories.h"
 #include "Accounts.h"
+#include "Operations.h"
 
 namespace DataStorage {
     class IDataStorage;
@@ -19,6 +20,7 @@ namespace DataManager {
 
         std::shared_ptr<Categories> categories() override;
         std::shared_ptr<Accounts> accounts() override;
+        std::shared_ptr<Operations> operations() override;
 
         void appendCategory(Category category) override;
         void renameCategory(const std::string& name, int id) override;
@@ -26,11 +28,16 @@ namespace DataManager {
         void appendAccount(Account account) override;
         void renameAccount(const std::string& name, int id) override;
 
+        void appendOperation(Operation operation) override;
+        void changeOperation(const Operation& operation, int id) override;
+        void deleteOperation(int id) override;
+
 
     private:
         std::shared_ptr<DataStorage::IDataStorage> m_dataStorage = nullptr;
         std::shared_ptr<Categories> m_categories = nullptr;
         std::shared_ptr<Accounts> m_accounts = nullptr;
+        std::shared_ptr<Operations> m_operations = nullptr;
         Listener* m_listener = nullptr;
     };
 }

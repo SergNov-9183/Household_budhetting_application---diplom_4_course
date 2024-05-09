@@ -5,6 +5,7 @@
 
 #include "CategoriesModel.h"
 #include "AccountsModel.h"
+#include "OperationsModel.h"
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -16,6 +17,7 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<EditorController>("HomeFinance", 1, 0, "EditorController");
     qmlRegisterType<CategoriesModel>("HomeFinance", 1, 0, "CategoriesModel");
     qmlRegisterType<AccountsModel>("HomeFinance", 1, 0, "AccountsModel");
+    qmlRegisterType<OperationsModel>("HomeFinance", 1, 0, "OperationsModel");
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("globalController", editorController.data());

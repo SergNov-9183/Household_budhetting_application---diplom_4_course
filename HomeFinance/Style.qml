@@ -41,6 +41,8 @@ QtObject {
         })
     }
 
+    readonly property int animationDuration: 150
+
     readonly property QtObject height: QtObject {
         readonly property real base: 32
     }
@@ -52,7 +54,7 @@ QtObject {
     }
 
     readonly property QtObject size: QtObject {
-        readonly property real icon: 24
+        readonly property real icon: 21
         readonly property real listViewDelegateX: 8
         readonly property real photo: 60
     }
@@ -70,5 +72,16 @@ QtObject {
     readonly property QtObject margins: QtObject {
         readonly property real base: 10
         readonly property real listViewDelegate: 5
+    }
+
+    readonly property QtObject expandingButton: QtObject {
+        readonly property color hoveredColor: "#454545"
+        readonly property color borderColor: "#9B9B9B"
+        readonly property color selectedColor: "#40BDFF"
+    }
+
+    readonly property QtObject tabButton: QtObject {
+        readonly property color normalColor: "#D2D2D2"
+        readonly property color selectedColor: colors.font
     }
 }

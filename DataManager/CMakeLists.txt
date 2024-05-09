@@ -17,6 +17,6 @@ add_library(DataManager SHARED
     DataManager.hpp
 )
 
-target_link_libraries(DataManager PRIVATE DataStorage)
+target_link_libraries(DataManager PRIVATE Common DataStorage)
 
 target_compile_definitions(DataManager PRIVATE DATAMANAGER_LIBRARY)

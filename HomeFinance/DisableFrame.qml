@@ -12,6 +12,7 @@ MouseArea {
         anchors.fill: parent
         color: "#000000"
         opacity: 0.6
+        radius: Style.radius.window
     }
 
     onClicked:         (mouse) => mouse.accepted = true

@@ -26,6 +26,7 @@ namespace DataStorage {
         bool insert(const std::map<std::string, std::string>& data);
         bool select(const qslSelectFields& fields, qslSelectResult& values);
         bool update(const std::map<std::string, std::string>& data, int id);
+        bool remove(const int id);
 
         static std::string prepareStringValue(const std::string& value);
 

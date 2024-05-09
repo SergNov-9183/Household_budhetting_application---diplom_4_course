@@ -7,6 +7,7 @@
 namespace DataStorage {
     class SqlCategories;
     class SqlAccounts;
+    class SqlOperations;
     class DataStorage final : public IDataStorage{
     public:
         DataStorage();
@@ -21,10 +22,16 @@ namespace DataStorage {
         bool appendAccount(const Account& account, int& id) override;
         bool renameAccount(const std::string& name, int id) override;
 
+        bool loadOperations(std::shared_ptr<Operations>& operations) override;
+        bool appendOperation(const Operation& operation, int& id) override;
+        bool changeOperation(const Operation& operation, int id) override;
+        bool deleteOperation(int id) override;
+
     private:
         Database m_db;
         std::shared_ptr<SqlCategories> m_categories = nullptr;
         std::shared_ptr<SqlAccounts> m_accounts = nullptr;
+        std::shared_ptr<SqlOperations> m_operations = nullptr;
     };
 }
 

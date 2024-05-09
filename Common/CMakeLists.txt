@@ -10,6 +10,9 @@ add_library(Common SHARED
   Utils.cpp Utils.h
   Categories.h
   Accounts.h
+  Operations.h
+  Category.cpp
+  Accounts.cpp
 )
 
 target_compile_definitions(Common PRIVATE COMMON_LIBRARY)

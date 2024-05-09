@@ -5,6 +5,7 @@
 #include <string>
 #include "Categories.h"
 #include "Accounts.h"
+#include "Operations.h"
 #include "Enums.h"
 
 namespace DataStorage {
@@ -19,6 +20,11 @@ namespace DataStorage {
         virtual bool loadAccounts(std::shared_ptr<Accounts>& accounts) = 0;
         virtual bool appendAccount(const Account& account, int& id) = 0;
         virtual bool renameAccount(const std::string& name, int id) = 0;
+
+        virtual bool loadOperations(std::shared_ptr<Operations>& operations) = 0;
+        virtual bool appendOperation(const Operation& operation, int& id) = 0;
+        virtual bool changeOperation(const Operation& operation, int id) = 0;
+        virtual bool deleteOperation(int id) = 0;
     };
 }
 

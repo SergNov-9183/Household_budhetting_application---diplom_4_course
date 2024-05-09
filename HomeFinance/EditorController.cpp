@@ -34,7 +34,6 @@ EditorController::EditorController(QObject* parent)
     , m_settings(new HFSettings(QSettings::Format::NativeFormat, QSettings::Scope::UserScope, "Sergey & Company", "Home Finance", this))
     , m_dataManager(DataManager::dataManager()) {
     m_dataManager->setListener(this);
-    //m_dataManager->openProject("D:/Sergey/Documents/HomeFinance.sqlite3");
     initializingFonts();
 }
 
@@ -44,6 +43,10 @@ std::shared_ptr<Categories> EditorController::categories() const {
 
 std::shared_ptr<Accounts> EditorController::accounts() const {
     return m_dataManager->accounts();
+}
+
+std::shared_ptr<Operations> EditorController::operations() const {
+    return m_dataManager->operations();
 }
 
 void EditorController::load() {
@@ -84,7 +87,7 @@ void EditorController::renameCategory(const QString &name, int id) {
 }
 
 void EditorController::appendCategory(const QString& name, int level, bool income, int parentId) {
-    m_dataManager->appendCategory({ -1, name.toStdString(), level, income, parentId });
+    m_dataManager->appendCategory({ -1, name.toStdString() + " " + std::to_string(categories()->size()), level, income, parentId });
 }
 
 void EditorController::renameAccount(const QString &name, int id) {
@@ -92,7 +95,7 @@ void EditorController::renameAccount(const QString &name, int id) {
 }
 
 void EditorController::appendAccount(const QString& name, int type, int parentId) {
-    m_dataManager->appendAccount({ -1, name.toStdString(), type, parentId });
+    m_dataManager->appendAccount({ -1, name.toStdString() + " " + std::to_string(accounts()->size()), type, parentId });
 }
 
 void EditorController::onCategoryAppend() {
@@ -109,6 +112,18 @@ void EditorController::onAccountAppend() {
 
 void EditorController::onAccountRenamed(int id) {
     emit accountRenamed(id);
+}
+
+void EditorController::onOperationAppend() {
+    emit operationAppended();
+}
+
+void EditorController::onOperationChanged(int id) {
+    emit operationChanged(id);
+}
+
+void EditorController::onOperationDeleted(int id) {
+    emit operationDeleted(id);
 }
 
 HFSettings *EditorController::settings() {

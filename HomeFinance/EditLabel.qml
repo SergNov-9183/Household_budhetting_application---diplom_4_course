@@ -13,6 +13,18 @@ Item {
 
     signal rename(string text)
 
+    function finishEditing() {
+        root.edited = false
+        if (editor.text && editor.text !== root.text) {
+            root.rename(editor.text)
+        }
+    }
+
+    function startEditing() {
+        edited = true
+        editor.activate()
+    }
+
     implicitHeight: label.implicitHeight
     implicitWidth: label.implicitWidth
 
@@ -27,6 +39,7 @@ Item {
     }
 
     HFEditText {
+        id: editor
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -45,14 +58,13 @@ Item {
         }
         onFocusChanged: {
             if (!focus) {
-                root.edited = false
+                finishEditing()
             }
         }
-        onAccepted: {
-            root.edited = false
-            root.rename(text)
+        onAccepted: root.finishEditing()
+        Keys.onEscapePressed: {
+            editor.text = root.text
+            root.finishEditing()
         }
-
-        Keys.onEscapePressed: root.edited = false
     }
 }

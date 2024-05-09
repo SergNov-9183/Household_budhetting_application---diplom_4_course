@@ -1,5 +1,7 @@
 #include "CategoriesModel.h"
 
+#include <QTimer>
+
 CategoriesModel::CategoriesModel(QObject *parent)
     : QAbstractListModel{parent}
     , m_allCategories(new CategoriesProxyModel(CategoriesProxyModel::CategoryType::All, this))
@@ -26,30 +28,32 @@ CategoriesModel::~CategoriesModel() {
 }
 
 bool CategoriesModel::isParent(int myId, int targetId, QModelIndex& index) const {
-    auto targetLevel = m_nodes.at(m_mapNodes.at(targetId)).category.level;
+    auto targetLevel = level(m_mapNodes.at(targetId));
     do {
-        auto parentId = m_nodes.at(m_mapNodes.at(myId)).category.parentId;
-        if (parentId < 1 || parentId == targetId) {
+        auto parentId = category(m_mapNodes.at(myId)).parentId;
+        if (parentId < 1) {
             break;
         }
+        if (parentId == targetId) {
+            return true;
+        }
         auto row   = m_mapNodes.at(parentId);
-        auto& node = m_nodes.at(row);
-        if (targetLevel == node.category.level) {
+        if (targetLevel == level(row)) {
             index = createIndex(row, 0);
-            return false;
+            break;
         }
         myId = parentId;
     } while (true);
-    return true;
+    return false;
 }
 
-void CategoriesModel::findCommonParent(int leftParentId, int rightParentId, QModelIndex& leftIndex, QModelIndex& rightIndex) {
+void CategoriesModel::findCommonParent(int leftId, int rightId, QModelIndex& leftIndex, QModelIndex& rightIndex) {
     do {
-        auto leftRow   = m_mapNodes.at(leftParentId);
-        auto rightRow  = m_mapNodes.at(rightParentId);
-        leftParentId   = m_nodes.at(leftRow).category.parentId;
-        rightParentId  = m_nodes.at(rightRow).category.parentId;
-        if (leftParentId == rightParentId || leftParentId < 1 || rightParentId < 1) {
+        auto leftRow  = m_mapNodes.at(leftId);
+        auto rightRow = m_mapNodes.at(rightId);
+        leftId        = category(leftRow).parentId;
+        rightId       = category(rightRow).parentId;
+        if (leftId == rightId || leftId < 1 || rightId < 1) {
             leftIndex = createIndex(leftRow, 0);
             rightIndex = createIndex(rightRow, 0);
             break;
@@ -60,7 +64,7 @@ void CategoriesModel::findCommonParent(int leftParentId, int rightParentId, QMod
 bool CategoriesModel::isVisible(int id) const {
     auto row = m_mapNodes.at(id);
     do {
-        id = m_nodes.at(row).category.parentId;
+        id = category(row).parentId;
         if (id < 1) {
             break;
         }
@@ -91,11 +95,11 @@ QVariant CategoriesModel::data(const QModelIndex& index, int role) const {
     }
 
     switch (role) {
-    case Name:        return QString::fromStdString(m_nodes[row].category.name);
-    case Id:          return m_nodes[row].category.id;
-    case Level:       return m_nodes[row].category.level;
-    case Income:      return m_nodes[row].category.income;
-    case ParentId:    return m_nodes[row].category.parentId;
+    case Name:        return QString::fromStdString(category(row).name);
+    case Id:          return category(row).id;
+    case Level:       return level(row);
+    case Income:      return category(row).income;
+    case ParentId:    return category(row).parentId;
     case IsExpanded:  return m_nodes[row].isExpanded;
     case HasChildren: return m_nodes[row].children.size() > 0;
     default:          return QVariant();
@@ -113,13 +117,12 @@ void CategoriesModel::onPprojectLoaded() {
         m_nodes.clear();
         auto categories = m_editorController->categories();
         for (auto i = 0; i < categories->size(); ++i) {
-            auto& category = categories->at(i);
-            m_nodes.push_back({ category, category.level == 0 });
-            m_mapNodes[category.id] = i;
+            m_nodes.push_back({ level(i) == 0 });
+            m_mapNodes[categories->at(i).id] = i;
         }
         for (auto i = 0; i < m_nodes.size(); ++i) {
-            if (auto parentId = m_nodes[i].category.parentId; parentId > 0) {
-                m_nodes[m_mapNodes[parentId]].children.insert(m_nodes[i].category.id);
+            if (auto parentId = category(i).parentId; parentId > 0) {
+                m_nodes[m_mapNodes[parentId]].children.insert(category(i).id);
             }
         }
         endResetModel();
@@ -127,20 +130,32 @@ void CategoriesModel::onPprojectLoaded() {
 }
 
 void CategoriesModel::onAppended() {
-    auto index              = m_nodes.size();
-    auto categories         = m_editorController->categories();
-    auto& category          = categories->at(index);
-    m_mapNodes[category.id] = index;
+    auto index      = m_nodes.size();
+    auto categories = m_editorController->categories();
+    auto& category  = categories->at(index);
     beginInsertRows(QModelIndex(), index, index);
-    m_nodes.push_back({ category });
+    m_mapNodes[category.id] = index;
+    m_nodes.push_back({});
     endInsertRows();
-    invalidateFilter();
     if (auto parentId = category.parentId; parentId > 0) {
-        auto row   = m_mapNodes.at(parentId);
+        auto row = m_mapNodes.at(parentId);
         m_nodes.at(row).children.insert(category.id);
-        auto modelIndex = createIndex(row, 0);
-        emit dataChanged(modelIndex, modelIndex, { IsExpanded, HasChildren });
+        QList<int> roles;
+        if (m_nodes.at(row).children.size() == 1) {
+            m_nodes.at(row).isExpanded = true;
+            roles.append({ IsExpanded, HasChildren });
+        }
+        else if (!m_nodes.at(row).isExpanded) {
+            m_nodes.at(row).isExpanded = true;
+            roles.append(IsExpanded);
+        }
+        if (roles.size() > 0) {
+            auto modelIndex = createIndex(row, 0);
+            emit dataChanged(modelIndex, modelIndex, roles);
+        }
     }
+    invalidateData();
+    QTimer::singleShot(200, this, [this, id = category.id]() { emit startRename(id); });
 }
 
 void CategoriesModel::onRenamed(int id) {
@@ -198,8 +213,16 @@ void CategoriesModel::connectController() {
     }
 }
 
-void CategoriesModel::invalidateFilter() {
-    m_allCategories->invalidateFilter();
-    m_incomeCategories->invalidateFilter();
-    m_expenseCategories->invalidateFilter();
+void CategoriesModel::invalidateData() {
+    m_allCategories->invalidate();
+    m_incomeCategories->invalidate();
+    m_expenseCategories->invalidate();
+}
+
+int CategoriesModel::level(int index) const {
+    return m_editorController->categories()->at(index).level;
+}
+
+const Category& CategoriesModel::category(int index) const {
+    return m_editorController->categories()->at(index);
 }

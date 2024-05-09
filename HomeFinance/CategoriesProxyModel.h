@@ -15,7 +15,7 @@ public:
 
 public slots:
     void shevronClisked(int id);
-    void invalidateFilter();
+    void invalidateData();
 
 protected:
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;

@@ -8,27 +8,25 @@ AbstractButton {
 
     property bool isDefault: false
 
-    property color backgroundNormal: "#2D2D2D"
-    property color backgroundNormalHovered: "#323232"
-    property color backgroundDefault: "#40BDFF"
-    property color backgroundDefaultHovered: "#3CADE8"
     property color fontNormalColor: Style.colors.font
     property color fontDefaultColor: "#000000"
 
-    implicitWidth: label.implicitWidth + 20
+    implicitWidth: label.implicitWidth + 2 * Style.margins.base
     implicitHeight: Math.max(Style.height.base, label.implicitHeight)
     hoverEnabled: enabled
     background: Rectangle {
-        color: root.isDefault
-               ? root.hovered ? root.backgroundDefaultHovered : root.backgroundDefault
-               : root.hovered ? root.backgroundNormalHovered : root.backgroundNormal
+        border {
+            width: Style.width.border
+            color: root.isDefault ? Style.colors.focused : Style.expandingButton.borderColor
+        }
         radius: Style.radius.base
+        color: root.hovered ? Style.expandingButton.hoveredColor : "transparent"
         opacity: root.enabled ? Style.opacity.enabled : Style.opacity.disabled
         HFLabel {
             id: label
             anchors.centerIn: parent
             text: root.text
-            color: root.isDefault ? root.fontDefaultColor : root.fontNormalColor
+            color: root.selected || root.hovered ? Style.tabButton.selectedColor : Style.tabButton.normalColor
         }
     }
 }

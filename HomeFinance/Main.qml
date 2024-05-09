@@ -10,14 +10,19 @@ import HomeFinance
 Window {
     id: root
 
+    property AccountsModel accountsModel: AccountsModel {
+        editorController: globalController
+    }
     property CategoriesModel categoriesModel: CategoriesModel {
         editorController: globalController
     }
 
     width: 1280
     height: 720
-    minimumWidth: 1280
-    minimumHeight: 720
+    minimumWidth: Math.max(accountsDialog.width, categoriesDialog.width, settingsDialog.width) +
+                  expandingMenu.implicitWidth + 4 * Style.margins.base
+    minimumHeight: Math.max(accountsDialog.height, categoriesDialog.height, settingsDialog.height) +
+                   settingsButton.implicitHeight + statusBar.height + 6 * Style.margins.base
     visible: true
     title: qsTr("Домашние финансы")
     color: Style.colors.backgroundWindow
@@ -28,7 +33,7 @@ Window {
         target: globalController
         function onHasProjectChanged(value) {
             if (value) {
-                sectionList.currentIndex = 1
+                stackLayout.currentIndex = 0
             }
         }
         function onNeedCreateOrOpenProject() {
@@ -69,72 +74,96 @@ Window {
         }
     }
 
-    UserFrame {
-        id: userInfo
+    ExpandingMenu {
+        id: expandingMenu
         anchors {
-            left: parent.left
-            top: parent.top
-            margins: Style.margins.base
-        }
-        onClicked: sectionList.currentIndex = 4
-    }
-
-    BorderLine {
-        id: leftArea
-        anchors {
-            left: userInfo.right
-            leftMargin: Style.margins.base
+            left : parent.left
             top: parent.top
             bottom: statusBar.top
         }
-        isHorizontal: false
-    }
-
-    BorderLine {
-        id: userArea
-        anchors {
-            left: parent.left
-            top: userInfo.bottom
-            topMargin: Style.margins.base
-            right: leftArea.left
+        accountsSelected: accountsDialog.visible
+        categoriesSelected: categoriesDialog.visible
+        expanded: hovered || settingsButton.hovered || disableFrame.visible
+        onAccountsButtonClicked: {
+            categoriesDialog.hide()
+            settingsDialog.hide()
+            accountsDialog.show()
+        }
+        onCategoriesButtonClicked: {
+            accountsDialog.hide()
+            settingsDialog.hide()
+            categoriesDialog.show()
+        }
+        onUserButtonClicked: {
+            accountsDialog.hide()
+            categoriesDialog.hide()
+            settingsDialog.showUsers()
         }
     }
 
-    SectionList {
-        id: sectionList
+    ExpandingButton {
+        id: settingsButton
         anchors {
-            left: parent.left
-            top: userArea.bottom
-            right: leftArea.left
-            bottom: statusBar.top
+            top: parent.top
+            right: parent.right
             margins: Style.margins.base
         }
-        onClicked: (index) => mainArea.currentIndex = index
+        layoutDirection: Qt.RightToLeft
+        expanded: hovered || expandingMenu.hovered || disableFrame.visible
+        image: "qrc:/Images/Settings.svg"
+        text: qsTr("Настройки")
+        selected: settingsDialog.visible
+        onClicked: {
+            accountsDialog.hide()
+            categoriesDialog.hide()
+            settingsDialog.show()
+        }
+    }
+
+    TabsRow {
+        anchors {
+            left: mainFrame.left
+            bottom: mainFrame.top
+        }
+        contents: stackLayout
+        model: ListModel {
+            ListElement {
+                name: qsTr("Операции")
+                icon: "Operations"
+            }
+            ListElement {
+                name: qsTr("Аналитика")
+                icon: "Analytics"
+            }
+        }
     }
 
     FrameItem {
         id: mainFrame
         anchors {
-            left: leftArea.right
-            top: parent.top
+            left: expandingMenu.right
+            top: settingsButton.bottom
             right: parent.right
             bottom: statusBar.top
             margins: Style.margins.base
         }
 
         StackLayout {
-            id: mainArea
-            anchors {
-                fill: parent
-                margins: Style.margins.base
-            }
+            id: stackLayout
+            anchors.fill: parent
 
-            AccountsSection   {}
             OperationsSection {}
-            CategoriesSection {}
             AnalyticsSection  {}
-            SettingsSection   {}
         }
+
+        DisableFrame {
+            id: disableFrame
+            visible: !globalController.hasProject || settingsDialog.visible || categoriesDialog.visible || accountsDialog.visible
+        }
+
+        AccountsDialog { id: accountsDialog }
+        CategoriesDialog { id: categoriesDialog }
+        SettingsDialog { id: settingsDialog }
     }
 
     Item {
@@ -154,11 +183,4 @@ Window {
             }
         }
     }
-
-    DisableFrame {
-        visible: !globalController.hasProject || fileDialog.visible || addCategoryWindow.visible || addAccountWindow.visible
-    }
-    AddCategoryDialog { id: addCategoryWindow }
-
-    AddAccountDialog { id: addAccountWindow }
 }

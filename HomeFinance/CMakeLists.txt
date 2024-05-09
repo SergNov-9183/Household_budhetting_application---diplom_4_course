@@ -9,7 +9,7 @@ include_directories(
     ${ROOT_SOURCE_DIR}/DataManager/
 )
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Quick Qml Gui)
 
 qt_standard_project_setup()
 
@@ -35,22 +35,26 @@ qt_add_qml_module(appHomeFinance
     QML_FILES EditLabel.qml
     QML_FILES HFDialogWindow.qml
     QML_FILES TextButton.qml
-    QML_FILES AddCategoryDialog.qml
     QML_FILES HFEditText.qml
-    QML_FILES UserFrame.qml
     QML_FILES BorderLine.qml
-    QML_FILES SectionList.qml
-    QML_FILES CategoriesSection.qml
-    QML_FILES SettingsSection.qml
+    QML_FILES CategoriesDialog.qml
+    QML_FILES SettingsDialog.qml
     QML_FILES OperationsSection.qml
-    QML_FILES AccountsSection.qml
+    QML_FILES AccountsDialog.qml
     QML_FILES AnalyticsSection.qml
     QML_FILES DisableFrame.qml
     SOURCES HFSettings.h HFSettings.cpp
     SOURCES AccountsModel.h AccountsModel.cpp
     SOURCES AccountsProxyModel.h AccountsProxyModel.cpp
     QML_FILES AccountsList.qml
-    QML_FILES AddAccountDialog.qml
+    QML_FILES ExpandingButton.qml
+    QML_FILES HFTabButton.qml
+    QML_FILES ExpandingMenu.qml
+    QML_FILES TabsRow.qml
+    SOURCES AccountsTabsProxyModel.h AccountsTabsProxyModel.cpp
+    QML_FILES OperationsList.qml
+    SOURCES OperationsModel.h OperationsModel.cpp
+    SOURCES OperationsProxyModel.h OperationsProxyModel.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -64,7 +68,7 @@ set_target_properties(appHomeFinance PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appHomeFinance PRIVATE Qt6::Quick DataManager DataStorage Common)
+target_link_libraries(appHomeFinance PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Gui DataManager DataStorage Common)
 
 include(GNUInstallDirs)
 install(TARGETS appHomeFinance

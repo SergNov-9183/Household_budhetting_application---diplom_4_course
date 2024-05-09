@@ -10,15 +10,22 @@ Item {
     property alias okText: okButton.text
     property alias cancelText: cancelButton.text
     property alias okEnabled: okButton.enabled
+    property alias okVisible: okButton.visible
+
+    property real contentHeight: 0
+    property real contentWidth: 0
 
     signal accepted()
 
-    function show() { visible = true }
+    function show() {
+        visible = true
+        placeholder.forceActiveFocus()
+    }
     function hide() { visible = false }
 
     anchors.centerIn: parent
-    height: 200
-    width: 400
+    height: contentHeight + 4 * Style.margins.base + line.height + cancelButton.height
+    width: contentWidth + 2 * Style.margins.base
     visible: false
 
     Item {
@@ -54,7 +61,7 @@ Item {
         color: "transparent"
         radius: Style.radius.window
 
-        FrameItem {
+        Item {
             id: placeholder
             anchors {
                 left: parent.left
@@ -65,7 +72,7 @@ Item {
             }
         }
 
-        Rectangle {
+        BorderLine {
             id: line
             anchors {
                 left: parent.left
@@ -73,8 +80,6 @@ Item {
                 bottom: cancelButton.top
                 margins: Style.margins.base
             }
-            height: 1
-            color: Style.colors.lineColor
         }
 
         TextButton {
@@ -85,7 +90,7 @@ Item {
                 margins: Style.margins.base
             }
             width: okButton.width
-            text: qsTr("Отмена")
+            text: qsTr("Закрыть")
             onClicked: root.hide()
         }
 
@@ -99,6 +104,7 @@ Item {
             isDefault: true
             width: Math.max(okButton.implicitWidth, cancelButton.implicitWidth)
             text: qsTr("Ok")
+            visible: false
             onClicked: {
                 root.hide()
                 accepted()

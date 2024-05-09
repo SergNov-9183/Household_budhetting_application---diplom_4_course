@@ -1,8 +1,22 @@
 #include "AccountsModel.h"
 
+#include <QTimer>
+
+namespace {
+    QString getIcon(int accountType) {
+        switch (accountType) {
+            case 0:  return QString("Cash");
+            case 1:  return QString("BankAccount");
+            case 2:  return QString("DebitCard");
+            default: return QString("");
+        }
+    }
+}
+
 AccountsModel::AccountsModel(QObject *parent)
     : QAbstractListModel{parent}
-    , m_accounts(new AccountsProxyModel(this)) {
+    , m_accounts(new AccountsProxyModel(this))
+    , m_accountsTabs(new AccountsTabsProxyModel(this)) {
     m_roles = QAbstractListModel::roleNames();
     m_roles[Name]        = "name";
     m_roles[Id]          = "id";
@@ -11,8 +25,11 @@ AccountsModel::AccountsModel(QObject *parent)
     m_roles[ParentId]    = "parentId";
     m_roles[IsExpanded]  = "isExpanded";
     m_roles[HasChildren] = "hasChildren";
+    m_roles[Icon]        = "icon";
     m_accounts->setSourceModel(this);
     m_accounts->sort(0);
+    m_accountsTabs->setSourceModel(this);
+    m_accountsTabs->sort(0);
 }
 
 AccountsModel::~AccountsModel() {
@@ -20,30 +37,32 @@ AccountsModel::~AccountsModel() {
 }
 
 bool AccountsModel::isParent(int myId, int targetId, QModelIndex& index) const {
-    auto targetLevel = level(m_nodes.at(m_mapNodes.at(targetId)).account);
+    auto targetLevel = level(m_mapNodes.at(targetId));
     do {
-        auto parentId = m_nodes.at(m_mapNodes.at(myId)).account.parentId;
-        if (parentId < 1 || parentId == targetId) {
+        auto parentId = account(m_mapNodes.at(myId)).parentId;
+        if (parentId < 1) {
             break;
         }
+        if (parentId == targetId) {
+            return true;
+        }
         auto row   = m_mapNodes.at(parentId);
-        auto& node = m_nodes.at(row);
-        if (targetLevel == level(node.account)) {
+        if (targetLevel == level(row)) {
             index = createIndex(row, 0);
-            return false;
+            break;
         }
         myId = parentId;
     } while (true);
-    return true;
+    return false;
 }
 
-void AccountsModel::findCommonParent(int leftParentId, int rightParentId, QModelIndex& leftIndex, QModelIndex& rightIndex) {
+void AccountsModel::findCommonParent(int leftId, int rightId, QModelIndex& leftIndex, QModelIndex& rightIndex) {
     do {
-        auto leftRow   = m_mapNodes.at(leftParentId);
-        auto rightRow  = m_mapNodes.at(rightParentId);
-        leftParentId   = m_nodes.at(leftRow).account.parentId;
-        rightParentId  = m_nodes.at(rightRow).account.parentId;
-        if (leftParentId == rightParentId || leftParentId < 1 || rightParentId < 1) {
+        auto leftRow  = m_mapNodes.at(leftId);
+        auto rightRow = m_mapNodes.at(rightId);
+        leftId        = account(leftRow).parentId;
+        rightId       = account(rightRow).parentId;
+        if (leftId == rightId || leftId < 1 || rightId < 1) {
             leftIndex = createIndex(leftRow, 0);
             rightIndex = createIndex(rightRow, 0);
             break;
@@ -54,7 +73,7 @@ void AccountsModel::findCommonParent(int leftParentId, int rightParentId, QModel
 bool AccountsModel::isVisible(int id) const {
     auto row = m_mapNodes.at(id);
     do {
-        id = m_nodes.at(row).account.parentId;
+        id = account(row).parentId;
         if (id < 1) {
             break;
         }
@@ -85,13 +104,14 @@ QVariant AccountsModel::data(const QModelIndex& index, int role) const {
     }
 
     switch (role) {
-    case Name:        return QString::fromStdString(m_nodes[row].account.name);
-    case Id:          return m_nodes[row].account.id;
-    case Level:       return level(m_nodes[row].account);
-    case Type:        return m_nodes[row].account.type;
-    case ParentId:    return m_nodes[row].account.parentId;
+    case Name:        return QString::fromStdString(account(row).name);
+    case Id:          return account(row).id;
+    case Level:       return level(row);
+    case Type:        return account(row).type;
+    case ParentId:    return account(row).parentId;
     case IsExpanded:  return m_nodes[row].isExpanded;
     case HasChildren: return m_nodes[row].children.size() > 0;
+    case Icon:        return getIcon(account(row).type);
     default:          return QVariant();
     }
 }
@@ -107,13 +127,12 @@ void AccountsModel::onPprojectLoaded() {
         m_nodes.clear();
         auto accounts = m_editorController->accounts();
         for (auto i = 0; i < accounts->size(); ++i) {
-            auto& account = accounts->at(i);
-            m_nodes.push_back({ account, level(account) == 0 });
-            m_mapNodes[account.id] = i;
+            m_nodes.push_back({ level(i) == 0 });
+            m_mapNodes[accounts->at(i).id] = i;
         }
         for (auto i = 0; i < m_nodes.size(); ++i) {
-            if (auto parentId = m_nodes[i].account.parentId; parentId > 0) {
-                m_nodes[m_mapNodes[parentId]].children.insert(m_nodes[i].account.id);
+            if (auto parentId = account(i).parentId; parentId > 0) {
+                m_nodes[m_mapNodes[parentId]].children.insert(account(i).id);
             }
         }
         endResetModel();
@@ -121,20 +140,32 @@ void AccountsModel::onPprojectLoaded() {
 }
 
 void AccountsModel::onAppended() {
-    auto index             = m_nodes.size();
-    auto accounts          = m_editorController->accounts();
-    auto& account          = accounts->at(index);
-    m_mapNodes[account.id] = index;
+    auto index    = m_nodes.size();
+    auto accounts = m_editorController->accounts();
+    auto& account = accounts->at(index);
     beginInsertRows(QModelIndex(), index, index);
-    m_nodes.push_back({ account });
+    m_mapNodes[account.id] = index;
+    m_nodes.push_back({});
     endInsertRows();
-    invalidateFilter();
     if (auto parentId = account.parentId; parentId > 0) {
-        auto row   = m_mapNodes.at(parentId);
+        auto row = m_mapNodes.at(parentId);
         m_nodes.at(row).children.insert(account.id);
-        auto modelIndex = createIndex(row, 0);
-        emit dataChanged(modelIndex, modelIndex, { IsExpanded, HasChildren });
+        QList<int> roles;
+        if (m_nodes.at(row).children.size() == 1) {
+            m_nodes.at(row).isExpanded = true;
+            roles.append({ IsExpanded, HasChildren });
+        }
+        else if (!m_nodes.at(row).isExpanded) {
+            m_nodes.at(row).isExpanded = true;
+            roles.append(IsExpanded);
+        }
+        if (roles.size() > 0) {
+            auto modelIndex = createIndex(row, 0);
+            emit dataChanged(modelIndex, modelIndex, roles);
+        }
     }
+    invalidateData();
+    QTimer::singleShot(200, this, [this, id = account.id]() { emit startRename(id); });
 }
 
 void AccountsModel::onRenamed(int id) {
@@ -156,8 +187,12 @@ void AccountsModel::setEditorController(EditorController* value) {
     }
 }
 
-QSortFilterProxyModel *AccountsModel::accounts() const {
+QSortFilterProxyModel* AccountsModel::accounts() const {
     return m_accounts;
+}
+
+QSortFilterProxyModel* AccountsModel::accountsTabs() const {
+    return m_accountsTabs;
 }
 
 bool AccountsModel::isValidIndex(int value) const {
@@ -184,10 +219,15 @@ void AccountsModel::connectController() {
     }
 }
 
-void AccountsModel::invalidateFilter() {
-    m_accounts->invalidateFilter();
+void AccountsModel::invalidateData() {
+    m_accounts->invalidateData();
+    m_accountsTabs->invalidateData();
 }
 
-int AccountsModel::level(const Account& account) const {
-    return account.parentId > 0 ? 1 : 0;
+int AccountsModel::level(int index) const {
+    return m_editorController->accounts()->at(index).parentId > 0 ? 1 : 0;
+}
+
+const Account& AccountsModel::account(int index) const {
+    return m_editorController->accounts()->at(index);
 }

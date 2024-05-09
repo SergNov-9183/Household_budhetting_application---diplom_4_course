@@ -5,11 +5,13 @@
 #include <QAbstractListModel>
 #include "EditorController.h"
 #include "AccountsProxyModel.h"
+#include "AccountsTabsProxyModel.h"
 
 class AccountsModel : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(EditorController* editorController READ editorController WRITE setEditorController NOTIFY editorControllerChanged)
     Q_PROPERTY(QSortFilterProxyModel* accounts READ accounts CONSTANT)
+    Q_PROPERTY(QSortFilterProxyModel* accountsTabs READ accountsTabs CONSTANT)
 
 public:
     enum AccountsRoles {
@@ -19,14 +21,15 @@ public:
         Type,
         ParentId,
         IsExpanded,
-        HasChildren
+        HasChildren,
+        Icon
     };
 
     explicit AccountsModel(QObject* parent = nullptr);
     ~AccountsModel();
 
     bool isParent(int myId, int targetId, QModelIndex& index) const;
-    void findCommonParent(int leftParentId, int rightParentId, QModelIndex& leftIndex, QModelIndex& rightIndex);
+    void findCommonParent(int leftId, int rightId, QModelIndex& leftIndex, QModelIndex& rightIndex);
     bool isVisible(int id) const;
     void shevronClisked(int id);
 
@@ -36,6 +39,7 @@ public:
 
 signals:
     void editorControllerChanged(EditorController*);
+    void startRename(int id);
 
 private slots:
     void onPprojectLoaded();
@@ -44,7 +48,6 @@ private slots:
 
 private:
     struct Node {
-        Account& account;
         bool isExpanded = false;
         std::set<int> children;
     };
@@ -53,14 +56,17 @@ private:
     void setEditorController(EditorController* value);
 
     QSortFilterProxyModel* accounts() const;
+    QSortFilterProxyModel* accountsTabs() const;
 
     bool isValidIndex(int value) const;
     void disconnectController();
     void connectController();
-    void invalidateFilter();
-    int level(const Account& account) const;
+    void invalidateData();
+    int level(int index) const;
+    const Account& account(int index) const;
 
     AccountsProxyModel* m_accounts = nullptr;
+    AccountsTabsProxyModel* m_accountsTabs = nullptr;
 
 
     QHash<int, QByteArray> m_roles;

@@ -28,7 +28,7 @@ public:
     ~CategoriesModel();
 
     bool isParent(int myId, int targetId, QModelIndex& index) const;
-    void findCommonParent(int leftParentId, int rightParentId, QModelIndex& leftIndex, QModelIndex& rightIndex);
+    void findCommonParent(int leftId, int rightId, QModelIndex& leftIndex, QModelIndex& rightIndex);
     bool isVisible(int id) const;
     void shevronClisked(int id);
 
@@ -38,6 +38,7 @@ public:
 
 signals:
     void editorControllerChanged(EditorController*);
+    void startRename(int id);
 
 private slots:
     void onPprojectLoaded();
@@ -46,7 +47,6 @@ private slots:
 
 private:
     struct Node {
-        Category& category;
         bool isExpanded = false;
         std::set<int> children;
     };
@@ -61,7 +61,9 @@ private:
     bool isValidIndex(int value) const;
     void disconnectController();
     void connectController();
-    void invalidateFilter();
+    void invalidateData();
+    int level(int index) const;
+    const Category& category(int index) const;
 
     CategoriesProxyModel* m_allCategories = nullptr;
     CategoriesProxyModel* m_incomeCategories = nullptr;
