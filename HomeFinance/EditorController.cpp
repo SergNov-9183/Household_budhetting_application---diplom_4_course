@@ -98,6 +98,20 @@ void EditorController::appendAccount(const QString& name, int type, int parentId
     m_dataManager->appendAccount({ -1, name.toStdString() + " " + std::to_string(accounts()->size()), type, parentId });
 }
 
+void EditorController::changeOperation(const QString& description, int categoryId, float price, int id) {
+    Operation operation{ id, description.toStdString(), categoryId, -1, std::string(), price};
+    m_dataManager->changeOperation(operation);
+}
+
+void EditorController::appendOperation(int accountId, int categoryId) {
+    auto dateTime = QDateTime::currentDateTime().toString().toStdString();
+    m_dataManager->appendOperation({ -1, std::string(), categoryId, accountId, dateTime, 0.0 });
+}
+
+void EditorController::removeOperation(int id) {
+    m_dataManager->removeOperation(id);
+}
+
 void EditorController::onCategoryAppend() {
     emit categoryAppended();
 }
@@ -122,8 +136,8 @@ void EditorController::onOperationChanged(int id) {
     emit operationChanged(id);
 }
 
-void EditorController::onOperationDeleted(int id) {
-    emit operationDeleted(id);
+void EditorController::onOperationRemoved(int id, int accountId) {
+    emit operationRemoved(id, accountId);
 }
 
 HFSettings *EditorController::settings() {

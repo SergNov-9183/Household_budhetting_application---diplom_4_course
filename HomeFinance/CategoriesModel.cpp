@@ -110,15 +110,23 @@ QHash<int, QByteArray> CategoriesModel::roleNames() const {
     return m_roles;
 }
 
+int CategoriesModel::defaultCategory() const {
+    return m_defaultCategory;
+}
+
 void CategoriesModel::onPprojectLoaded() {
     if (m_editorController) {
         beginResetModel();
+        m_defaultCategory = 0;
         m_mapNodes.clear();
         m_nodes.clear();
         auto categories = m_editorController->categories();
         for (auto i = 0; i < categories->size(); ++i) {
             m_nodes.push_back({ level(i) == 0 });
             m_mapNodes[categories->at(i).id] = i;
+            if (!categories->at(i).income && categories->at(i).parentId < 1) {
+                m_defaultCategory = categories->at(i).id;
+            }
         }
         for (auto i = 0; i < m_nodes.size(); ++i) {
             if (auto parentId = category(i).parentId; parentId > 0) {
@@ -200,6 +208,7 @@ void CategoriesModel::disconnectController() {
         disconnect(m_editorController, &EditorController::categoryRenamed, this, &CategoriesModel::onRenamed);
     }
     beginResetModel();
+    m_defaultCategory = 0;
     m_mapNodes.clear();
     m_nodes.clear();
     endResetModel();

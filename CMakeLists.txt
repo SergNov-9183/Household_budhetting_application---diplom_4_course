@@ -11,6 +11,7 @@ set(TARGET_SQLITE_DLL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sqlite3.dll)
 
 include_directories(
     ${ROOT_SOURCE_DIR}/Common/
+    ${ROOT_SOURCE_DIR}/DataManager/
 )
 
 link_directories(
@@ -21,3 +22,4 @@ add_subdirectory(HomeFinance)
 add_subdirectory(DataManager)
 add_subdirectory(DataStorage)
 add_subdirectory(Common)
+add_subdirectory(TestsForHomeFinance)

@@ -24,8 +24,8 @@ namespace DataStorage {
 
         bool loadOperations(std::shared_ptr<Operations>& operations) override;
         bool appendOperation(const Operation& operation, int& id) override;
-        bool changeOperation(const Operation& operation, int id) override;
-        bool deleteOperation(int id) override;
+        bool changeOperation(const Operation& operation) override;
+        bool removeOperation(int id) override;
 
     private:
         Database m_db;

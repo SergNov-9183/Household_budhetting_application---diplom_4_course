@@ -33,6 +33,10 @@ public slots:
     void renameAccount(const QString& name, int id);
     void appendAccount(const QString& name,int type, int parentId);
 
+    void changeOperation(const QString& description, int categoryId, float price, int id);
+    void appendOperation(int accountId, int categoryId);
+    void removeOperation(int id);
+
 signals:
     void categoryAppended();
     void categoryRenamed(int id);
@@ -42,7 +46,7 @@ signals:
 
     void operationAppended();
     void operationChanged(int id);
-    void operationDeleted(int id);
+    void operationRemoved(int id, int accountId);
 
     void projectLoaded();
     void needCreateOrOpenProject();
@@ -61,7 +65,7 @@ private:
 
     void onOperationAppend() override;
     void onOperationChanged(int id) override;
-    void onOperationDeleted(int id) override;
+    void onOperationRemoved(int id, int accountId) override;
 
     HFSettings* settings();
     QString userName() const;

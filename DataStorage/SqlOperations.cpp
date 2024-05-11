@@ -11,18 +11,17 @@ static const std::string fieldPrice          = "price";
 
 DataStorage::SqlOperations::SqlOperations(const Database &db) : SqlBase(db, table_name) {}
 
-bool DataStorage::SqlOperations::insert(const std::string& name, int categoryId, int accountId, std::string date, float price) {
+bool DataStorage::SqlOperations::insert(const std::string& description, int categoryId, int accountId, const std::string& date, float price) {
     std::map<std::string, std::string> data;
-    data[fieldDescription]     = prepareStringValue(name);
-    data[fieldCategoryId]     = std::to_string(categoryId);
-    data[fieldAccountId] = std::to_string(accountId);
-    data[fieldBuyDate] = prepareStringValue(date);
-    data[fieldPrice] = std::to_string(price);
+    data[fieldDescription] = prepareStringValue(description);
+    data[fieldCategoryId]  = std::to_string(categoryId);
+    data[fieldAccountId]   = std::to_string(accountId);
+    data[fieldBuyDate]     = prepareStringValue(date);
+    data[fieldPrice]       = std::to_string(price);
     return SqlBase::insert(data);
 }
 
 bool DataStorage::SqlOperations::remove(int id) {
-
     return SqlBase::remove(id);
 }
 
@@ -49,11 +48,11 @@ bool DataStorage::SqlOperations::select(std::shared_ptr<Operations> operations) 
     return false;
 }
 
-bool DataStorage::SqlOperations::update(const std::string &description, int categoryId, float price, int id) {
+bool DataStorage::SqlOperations::update(const std::string& description, int categoryId, float price, int id) {
     std::map<std::string, std::string> data;
     data[fieldDescription] = prepareStringValue(description);
-    data[fieldCategoryId] = categoryId;
-    data[fieldPrice] = price;
+    data[fieldCategoryId]  = std::to_string(categoryId);
+    data[fieldPrice]       = std::to_string(price);
     return SqlBase::update(data, id);
 }
 

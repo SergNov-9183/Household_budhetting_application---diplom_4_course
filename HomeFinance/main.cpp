@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<CategoriesModel>("HomeFinance", 1, 0, "CategoriesModel");
     qmlRegisterType<AccountsModel>("HomeFinance", 1, 0, "AccountsModel");
     qmlRegisterType<OperationsModel>("HomeFinance", 1, 0, "OperationsModel");
+    qmlRegisterType<OperationsProxyModel>("HomeFinance", 1, 0, "OperationsProxyModel");
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("globalController", editorController.data());

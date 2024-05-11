@@ -16,6 +16,9 @@ Window {
     property CategoriesModel categoriesModel: CategoriesModel {
         editorController: globalController
     }
+    property OperationsModel operationsModel: OperationsModel {
+        editorController: globalController
+    }
 
     width: 1280
     height: 720

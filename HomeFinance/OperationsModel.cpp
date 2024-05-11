@@ -7,12 +7,12 @@
 OperationsModel::OperationsModel(QObject *parent)
     : QAbstractListModel{parent} {
     m_roles = QAbstractListModel::roleNames();
-    m_roles[Name]        = "name";
+    m_roles[Description] = "description";
     m_roles[Id]          = "id";
-    m_roles[CategoryId]       = "categoryId";
-    m_roles[AccountId]      = "accountId";
-    m_roles[Date]    = "date";
-    m_roles[Price]  = "price";
+    m_roles[CategoryId]  = "categoryId";
+    m_roles[AccountId]   = "accountId";
+    m_roles[Date]        = "date";
+    m_roles[Price]       = "price";
 }
 
 OperationsModel::~OperationsModel() {
@@ -34,13 +34,13 @@ QVariant OperationsModel::data(const QModelIndex& index, int role) const {
     }
 
     switch (role) {
-    case Name:           return QString::fromStdString(operation(row).description);
-    case Id:             return operation(row).id;
-    case CategoryId:     return operation(row).categoryId;
-    case AccountId:      return operation(row).accountId;
-    case Date:           return QString::fromStdString(operation(row).date);
-    case Price:          return operation(row).price;
-    default:             return QVariant();
+    case Description: return QString::fromStdString(operation(row).description);
+    case Id:          return operation(row).id;
+    case CategoryId:  return operation(row).categoryId;
+    case AccountId:   return operation(row).accountId;
+    case Date:        return QString::fromStdString(operation(row).date);
+    case Price:       return operation(row).price;
+    default:          return QVariant();
     }
 }
 
@@ -51,9 +51,11 @@ QHash<int, QByteArray> OperationsModel::roleNames() const {
 void OperationsModel::onPprojectLoaded() {
     if (m_editorController) {
         beginResetModel();
+        m_nodes.clear();
         m_mapNodes.clear();
         auto operations = m_editorController->operations();
         for (auto i = 0; i < operations->size(); ++i) {
+            m_nodes.push_back({});
             m_mapNodes[operations->at(i).id] = i;
         }
         endResetModel();
@@ -72,9 +74,20 @@ void OperationsModel::onAppended() {
 }
 
 void OperationsModel::onChanged(int id) {
-    // auto row        = m_mapNodes.at(id);
-    // auto modelIndex = createIndex(row, 0);
-    // emit dataChanged(modelIndex, modelIndex, { Name });
+    auto row        = m_mapNodes.at(id);
+    auto modelIndex = createIndex(row, 0);
+    emit dataChanged(modelIndex, modelIndex, { Description, CategoryId, Price });
+}
+
+void OperationsModel::onRemoved(int id, int accountId) {
+    auto row   = m_mapNodes.at(id);
+    beginRemoveRows(QModelIndex(), row, row);
+    if (m_nodes.begin() != m_nodes.end()) {
+        m_nodes.erase(m_nodes.begin());
+    }
+    m_mapNodes.erase(id);
+    endRemoveRows();
+    invalidateData(accountId);
 }
 
 EditorController* OperationsModel::editorController() const {
@@ -97,19 +110,22 @@ bool OperationsModel::isValidIndex(int value) const {
 void OperationsModel::disconnectController() {
     if (m_editorController) {
         disconnect(m_editorController, &EditorController::projectLoaded, this, &OperationsModel::onPprojectLoaded);
-        disconnect(m_editorController, &EditorController::categoryAppended, this, &OperationsModel::onAppended);
-        disconnect(m_editorController, &EditorController::categoryRenamed, this, &OperationsModel::onChanged);
+        disconnect(m_editorController, &EditorController::operationAppended, this, &OperationsModel::onAppended);
+        disconnect(m_editorController, &EditorController::operationChanged, this, &OperationsModel::onChanged);
+        disconnect(m_editorController, &EditorController::operationRemoved, this, &OperationsModel::onRemoved);
     }
     beginResetModel();
-
+    m_mapNodes.clear();
+    m_nodes.clear();
     endResetModel();
 }
 
 void OperationsModel::connectController() {
     if (m_editorController) {
         connect(m_editorController, &EditorController::projectLoaded, this, &OperationsModel::onPprojectLoaded);
-        connect(m_editorController, &EditorController::categoryAppended, this, &OperationsModel::onAppended);
-        connect(m_editorController, &EditorController::categoryRenamed, this, &OperationsModel::onChanged);
+        connect(m_editorController, &EditorController::operationAppended, this, &OperationsModel::onAppended);
+        connect(m_editorController, &EditorController::operationChanged, this, &OperationsModel::onChanged);
+        connect(m_editorController, &EditorController::operationRemoved, this, &OperationsModel::onRemoved);
     }
 }
 

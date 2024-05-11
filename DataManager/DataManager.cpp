@@ -98,20 +98,25 @@ void DataManager::DataManager::renameAccount(const std::string& name, int id) {
     }
 }
 
-void DataManager::DataManager::changeOperation(const Operation& operation, int id) {
-    if (m_dataStorage->changeOperation(operation, id)) {
-        m_operations->push_back(operation);
+void DataManager::DataManager::changeOperation(const Operation& newOperation) {
+    if (auto operation = std::find_if(m_operations->begin(), m_operations->end(), [id = newOperation.id](const Operation& operation) { return operation.id == id; });
+        operation != m_operations->end() && m_dataStorage->changeOperation(newOperation)) {
+        operation->description = newOperation.description;
+        operation->categoryId  = newOperation.categoryId;
+        operation->price       = newOperation.price;
         if (m_listener) {
-            m_listener->onOperationChanged(id);
+            m_listener->onOperationChanged(newOperation.id);
         }
     }
 }
 
-void DataManager::DataManager::deleteOperation(int id) {
-    if (m_dataStorage->deleteOperation(id)) {
-        m_operations->pop_back();
+void DataManager::DataManager::removeOperation(int id) {
+    if (auto operation = std::find_if(m_operations->begin(), m_operations->end(), [id](const Operation& operation) { return operation.id == id; });
+        operation != m_operations->end() && m_dataStorage->removeOperation(id)) {
+        auto accountId  = operation->accountId;
+        m_operations->erase(operation);
         if (m_listener) {
-            m_listener->onOperationDeleted(id);
+            m_listener->onOperationRemoved(id, accountId);
         }
     }
 }

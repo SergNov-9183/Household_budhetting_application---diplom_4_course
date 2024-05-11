@@ -36,6 +36,8 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    Q_INVOKABLE int defaultCategory() const;
+
 signals:
     void editorControllerChanged(EditorController*);
     void startRename(int id);
@@ -73,6 +75,7 @@ private:
     EditorController* m_editorController = nullptr;
     std::vector<Node> m_nodes;
     std::map<int, size_t> m_mapNodes;
+    int m_defaultCategory = 0;
 };
 
 #endif // CATEGORIESMODEL_H

@@ -13,6 +13,7 @@ add_library(Common SHARED
   Operations.h
   Category.cpp
   Accounts.cpp
+  Operations.cpp
 )
 
 target_compile_definitions(Common PRIVATE COMMON_LIBRARY)

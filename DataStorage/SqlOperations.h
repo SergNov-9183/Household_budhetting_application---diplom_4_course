@@ -10,7 +10,7 @@ class SqlOperations final : public SqlBase {
 public:
     SqlOperations(const Database& db);
 
-    bool insert(const std::string& name, int categoryId, int accountId, std::string date, float price);
+    bool insert(const std::string& description, int categoryId, int accountId, const std::string& date, float price);
     bool select(std::shared_ptr<Operations> operations);
     bool update(const std::string& description, int categoryId, float price, int id);
     bool insert(int id);

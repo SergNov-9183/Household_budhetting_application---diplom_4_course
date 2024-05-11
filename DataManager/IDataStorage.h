@@ -23,8 +23,8 @@ namespace DataStorage {
 
         virtual bool loadOperations(std::shared_ptr<Operations>& operations) = 0;
         virtual bool appendOperation(const Operation& operation, int& id) = 0;
-        virtual bool changeOperation(const Operation& operation, int id) = 0;
-        virtual bool deleteOperation(int id) = 0;
+        virtual bool changeOperation(const Operation& operation) = 0;
+        virtual bool removeOperation(int id) = 0;
     };
 }
 

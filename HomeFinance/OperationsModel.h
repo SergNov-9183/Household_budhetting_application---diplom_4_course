@@ -14,7 +14,7 @@ class OperationsModel : public QAbstractListModel
 
 public:
     enum OperationsRoles {
-        Name = Qt::DisplayRole,
+        Description = Qt::DisplayRole,
         Id =  Qt::UserRole + 1,
         CategoryId,
         AccountId,
@@ -43,6 +43,7 @@ private slots:
     void onPprojectLoaded();
     void onAppended();
     void onChanged(int id);
+    void onRemoved(int id, int accountId);
 
 private:
     struct Node {

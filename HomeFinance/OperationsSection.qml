@@ -69,6 +69,7 @@ Item {
                 layoutDirection: Qt.RightToLeft
                 image: "qrc:/Images/AppendOperation.svg"
                 text: qsTr("Добавить чек")
+                onClicked: globalController.appendOperation(stackLayout.children[stackLayout.currentIndex].accountId, categoriesModel.defaultCategory())
             }
         }
     }

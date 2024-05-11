@@ -29,8 +29,8 @@ namespace DataManager {
         void renameAccount(const std::string& name, int id) override;
 
         void appendOperation(Operation operation) override;
-        void changeOperation(const Operation& operation, int id) override;
-        void deleteOperation(int id) override;
+        void changeOperation(const Operation& operation) override;
+        void removeOperation(int id) override;
 
 
     private:

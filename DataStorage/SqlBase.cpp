@@ -118,7 +118,7 @@ bool DataStorage::SqlBase::update(const std::map<std::string, std::string>& data
             sql << ", ";
         }
     }
-    sql << "where " << id_field << " = " << id;
+    sql << " where " << id_field << " = " << id;
     SqlQuery query(m_db);
     if (!query.executeCommand(sql.str())) {
         errorMessage = query.lastError();
@@ -128,7 +128,13 @@ bool DataStorage::SqlBase::update(const std::map<std::string, std::string>& data
 }
 
 bool DataStorage::SqlBase::remove(int id) {
-
+    std::stringstream sql;
+    sql << "delete from " << m_tableName << " where " << id_field << " = " << id;
+    SqlQuery query(m_db);
+    if (!query.executeCommand(sql.str())) {
+        errorMessage = query.lastError();
+        return false;
+    }
     return true;
 }
 

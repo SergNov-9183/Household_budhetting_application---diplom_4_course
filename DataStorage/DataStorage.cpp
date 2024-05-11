@@ -68,11 +68,11 @@ bool DataStorage::DataStorage::renameAccount(const std::string& name, int id) {
     return m_accounts && m_accounts->updateName(name, id);
 }
 
-bool DataStorage::DataStorage::changeOperation(const Operation& operation, int id) {
-    return m_operations && m_operations->update(operation.description, operation.categoryId, operation.price, id);
+bool DataStorage::DataStorage::changeOperation(const Operation& operation) {
+    return m_operations && m_operations->update(operation.description, operation.categoryId, operation.price, operation.id);
 }
 
-bool DataStorage::DataStorage::deleteOperation(int id) {
+bool DataStorage::DataStorage::removeOperation(int id) {
     return m_operations && m_operations->remove(id);
 }
 

@@ -20,7 +20,7 @@ namespace DataManager {
 
             virtual void onOperationAppend() = 0;
             virtual void onOperationChanged(int id) = 0;
-            virtual void onOperationDeleted(int id) = 0;
+            virtual void onOperationRemoved(int id, int accountId) = 0;
 
         };
 
@@ -38,8 +38,8 @@ namespace DataManager {
         virtual void renameAccount(const std::string& name, int id) = 0;
 
         virtual void appendOperation(Operation operation) = 0;
-        virtual void changeOperation(const Operation& operation, int id) = 0;
-        virtual void deleteOperation(int id) = 0;
+        virtual void changeOperation(const Operation& operation) = 0;
+        virtual void removeOperation(int id) = 0;
     };
 }
 

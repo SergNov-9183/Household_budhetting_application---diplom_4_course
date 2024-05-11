@@ -43,7 +43,7 @@ bool DataStorage::SqlCategories::select(std::shared_ptr<Categories> categories) 
 
 bool DataStorage::SqlCategories::updateName(const std::string &name, int id) {
     std::map<std::string, std::string> data;
-    data[fieldName]     = prepareStringValue(name);
+    data[fieldName] = prepareStringValue(name);
     return SqlBase::update(data, id);
 }
 
