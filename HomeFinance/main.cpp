@@ -17,6 +17,8 @@ int main(int argc, char *argv[]) {
     const QUrl styleUrl(u"qrc:/HomeFinance/Style.qml"_qs);
     qmlRegisterSingletonType(styleUrl, "HomeFinance", 1, 0, "Style");
 
+    qmlRegisterUncreatableMetaObject(PeriodType::staticMetaObject, "HomeFinance", 1, 0, "PeriodType", "Error!!");
+
     qmlRegisterType<EditorController>("HomeFinance", 1, 0, "EditorController");
     qmlRegisterType<CategoriesModel>("HomeFinance", 1, 0, "CategoriesModel");
     qmlRegisterType<AccountsModel>("HomeFinance", 1, 0, "AccountsModel");

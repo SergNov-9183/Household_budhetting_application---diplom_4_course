@@ -7,6 +7,7 @@ CategoriesModel::CategoriesModel(QObject *parent)
     , m_allCategories(new CategoriesProxyModel(CategoriesProxyModel::CategoryType::All, this))
     , m_incomeCategories(new CategoriesProxyModel(CategoriesProxyModel::CategoryType::Income, this))
     , m_expenseCategories(new CategoriesProxyModel(CategoriesProxyModel::CategoryType::Expense, this)) {
+    setPeriodDates();
     m_roles = QAbstractListModel::roleNames();
     m_roles[Name]        = "name";
     m_roles[Id]          = "id";
@@ -229,6 +230,10 @@ QSortFilterProxyModel *CategoriesModel::expenseCategories() const {
     return m_expenseCategories;
 }
 
+int CategoriesModel::periodType() const {
+    return static_cast<int>(m_periodType);
+}
+
 bool CategoriesModel::isValidIndex(int value) const {
     return value >= 0 && value < m_nodes.size();
 }
@@ -318,13 +323,36 @@ float CategoriesModel::calculateTotalSums(int id) {
     return totalSum;
 }
 
+void CategoriesModel::setPeriodDates() {
+    auto date = QDate::currentDate();
+    if (m_periodType == PeriodType::Enum::Year) {
+        m_beginPeriodDate = QDate(date.year(), 1, 1);
+        m_endPeriodDate = QDate(date.year(), 12, 31);
+    }
+    else if (m_periodType == PeriodType::Enum::Month) {
+        m_beginPeriodDate = QDate(date.year(), date.month(), 1);
+        m_endPeriodDate = QDate(date.year(), date.month(), date.daysInMonth());
+    }
+    else {
+        m_beginPeriodDate = date.addDays(-date.dayOfWeek() + 1);
+        m_endPeriodDate = m_beginPeriodDate.addDays(6);
+    }
+}
+
 void CategoriesModel::analyzeData() {
     if (m_editorController) {
         std::map<int, float> sum;
         auto operations = m_editorController->operations();
         for (auto i = 0; i < operations->size(); ++i) {
-            auto categoryId = operations->at(i).categoryId;
-            sum[categoryId] = sum[categoryId] + operations->at(i).price;
+            auto date = QDateTime::fromString(QString::fromStdString(operations->at(i).date)).date();
+            if (date >= m_beginPeriodDate && date <= m_endPeriodDate) {
+                auto categoryId = operations->at(i).categoryId;
+                sum[categoryId] = sum[categoryId] + operations->at(i).price;
+            }
+        }
+
+        for (auto& node : m_nodes) {
+            node.sum = 0;
         }
 
         for (const auto& item : sum) {
@@ -339,5 +367,15 @@ void CategoriesModel::analyzeData() {
         auto endModelIndex = createIndex(m_nodes.size() - 1, 0);
         emit dataChanged(beginModelIndex, endModelIndex, { Sum, TotalSum });
         emit analyzeDataComplited();
+    }
+}
+
+void CategoriesModel::setPeriodType(int value) {
+    auto newValue = static_cast<PeriodType::Enum>(value);
+    if (m_periodType != newValue) {
+        m_periodType = newValue;
+        emit periodTypeChanged(value);
+        setPeriodDates();
+        analyzeData();
     }
 }

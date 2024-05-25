@@ -6,12 +6,24 @@
 #include "EditorController.h"
 #include "CategoriesProxyModel.h"
 
+namespace PeriodType {
+    Q_NAMESPACE
+    enum class Enum {
+        Year = 0,
+        Month,
+        Week,
+        Custom
+    };
+    Q_ENUM_NS(Enum)
+};
+
 class CategoriesModel : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(EditorController* editorController READ editorController WRITE setEditorController NOTIFY editorControllerChanged)
     Q_PROPERTY(QSortFilterProxyModel* allCategories READ allCategories CONSTANT)
     Q_PROPERTY(QSortFilterProxyModel* incomeCategories READ incomeCategories CONSTANT)
     Q_PROPERTY(QSortFilterProxyModel* expenseCategories READ expenseCategories CONSTANT)
+    Q_PROPERTY(int periodType READ periodType NOTIFY periodTypeChanged)
 
 public:
     enum CategoriesRoles {
@@ -45,9 +57,11 @@ public:
 
 public slots:
     void analyzeData();
+    void setPeriodType(int value);
 
 signals:
     void editorControllerChanged(EditorController*);
+    void periodTypeChanged(int);
     void startRename(int id);
     void analyzeDataComplited();
 
@@ -72,6 +86,8 @@ private:
     QSortFilterProxyModel* incomeCategories() const;
     QSortFilterProxyModel* expenseCategories() const;
 
+    int periodType() const;
+
     bool isValidIndex(int value) const;
     void disconnectController();
     void connectController();
@@ -79,10 +95,13 @@ private:
     int level(int row) const;
     const Category& category(int row) const;
     float calculateTotalSums(int id);
+    void setPeriodDates();
 
     CategoriesProxyModel* m_allCategories = nullptr;
     CategoriesProxyModel* m_incomeCategories = nullptr;
     CategoriesProxyModel *m_expenseCategories = nullptr;
+
+    PeriodType::Enum m_periodType = PeriodType::Enum::Year;
 
     QHash<int, QByteArray> m_roles;
     EditorController* m_editorController = nullptr;
@@ -90,6 +109,8 @@ private:
     std::map<int, size_t> m_mapNodes;
     int m_defaultCategory = 0;
     int m_incomeCategory = 0;
+    QDate m_beginPeriodDate;
+    QDate m_endPeriodDate;
 };
 
 #endif // CATEGORIESMODEL_H

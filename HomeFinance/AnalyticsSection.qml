@@ -50,7 +50,10 @@ Item {
     Layout.fillHeight: true
     Layout.fillWidth: true
 
-    AnalyticsDateRangeSelector { id: analyticsDateRangeSelector }
+    PeriodPicker {
+        id: periodPicker
+        onClicked: (periodType) => categoriesModel.setPeriodType(periodType)
+    }
 
     Image {
         id: analyticsImage
@@ -213,9 +216,8 @@ Item {
             }
 
             TextButton {
-                isDefault: true
-                text: qsTr("Временной диапазон")
-                onClicked: analyticsDateRangeSelector.open()
+                text: periodPicker.getPeriodName(categoriesModel.periodType)
+                onClicked: periodPicker.show(mapToItem(root, 0, 0))
             }
 
             Item { Layout.fillWidth: true }
