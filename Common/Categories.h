@@ -6,12 +6,11 @@
 #include "CommonExport.h"
 
 struct COMMON_EXPORT Category {
-    Category(int id, const std::string& name, int level, bool income, int parentId = 0);
+    Category(int id, const std::string& name, bool income, int parentId = 0);
     Category(const Category& category);
     ~Category();
     int id;
     std::string name;
-    int level;
     bool income;
     int parentId;
 };

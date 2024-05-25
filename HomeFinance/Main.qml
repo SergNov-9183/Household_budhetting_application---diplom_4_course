@@ -18,6 +18,7 @@ Window {
     }
     property OperationsModel operationsModel: OperationsModel {
         editorController: globalController
+        categoriesModel: root.categoriesModel
     }
 
     width: 1280
@@ -126,6 +127,7 @@ Window {
     TabsRow {
         anchors {
             left: mainFrame.left
+            leftMargin: Style.radius.window
             bottom: mainFrame.top
         }
         contents: stackLayout
@@ -177,6 +179,41 @@ Window {
             bottom: parent.bottom
         }
         height: 30
+
+        Timer {
+            property int num: 0
+            interval: 3000
+            running: true
+            repeat: true
+            onTriggered: {
+                let text = ""
+                if (num === 0 && globalController.currencyUSD > 0) {
+                    text = qsTr("Текущий курс доллара: ") + globalController.currencyUSD.toFixed(2).replace(".", ",")
+                    ++num
+                }
+                else if (num === 1 && globalController.currencyEUR > 0) {
+                    text = qsTr("Текущий курс евро: ") + globalController.currencyEUR.toFixed(2).replace(".", ",")
+                    ++num
+                }
+                else if (num === 2 && globalController.currencyCNY > 0) {
+                    text = qsTr("Текущий курс юаня: ") + globalController.currencyCNY.toFixed(2).replace(".", ",")
+                    ++num
+                }
+                if (num > 2) {
+                    num = 0;
+                }
+                currencyLabel.text = text
+            }
+        }
+
+        HFLabel {
+            id: currencyLabel
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+                margins: Style.margins.base
+            }
+        }
 
         BorderLine {
             anchors {

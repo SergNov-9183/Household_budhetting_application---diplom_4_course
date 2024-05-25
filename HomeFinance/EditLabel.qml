@@ -10,6 +10,7 @@ Item {
     property alias text: label.text
     property alias font: label.font
     property alias color: label.color
+    property alias validator: editor.validator
 
     signal rename(string text)
 

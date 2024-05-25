@@ -7,10 +7,10 @@
 #include "OperationsProxyModel.h"
 
 class OperationsProxyModel;
-class OperationsModel : public QAbstractListModel
-{
+class OperationsModel : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(EditorController* editorController READ editorController WRITE setEditorController NOTIFY editorControllerChanged)
+    Q_PROPERTY(QAbstractListModel* categoriesModel READ categoriesModel WRITE setCategoriesModel NOTIFY categoriesModelChanged)
 
 public:
     enum OperationsRoles {
@@ -19,7 +19,8 @@ public:
         CategoryId,
         AccountId,
         Date,
-        Price
+        Price,
+        Balance
     };
 
     explicit OperationsModel(QObject* parent = nullptr);
@@ -37,6 +38,7 @@ public:
 
 signals:
     void editorControllerChanged(EditorController*);
+    void categoriesModelChanged(QAbstractListModel*);
     void startRename(int id);
 
 private slots:
@@ -44,14 +46,18 @@ private slots:
     void onAppended();
     void onChanged(int id);
     void onRemoved(int id, int accountId);
+    void onCategoryRenamed(int id);
+    void onCategoryMoved(int id, int oldParentId);
 
 private:
     struct Node {
-
+        float balance;
     };
 
     EditorController* editorController() const;
     void setEditorController(EditorController* value);
+    QAbstractListModel* categoriesModel() const;
+    void setCategoriesModel(QAbstractListModel* value);
 
     bool isValidIndex(int value) const;
     void disconnectController();
@@ -59,9 +65,13 @@ private:
     void invalidateData(int accountId);
     int level(int index) const;
     const Operation& operation(int index) const;
+    bool isIncome(int categoryId) const;
+    void updateBalance();
+    void updateCategories();
 
     QHash<int, QByteArray> m_roles;
     EditorController* m_editorController = nullptr;
+    QAbstractListModel* m_categoriesModel = nullptr;
     std::map<int, size_t> m_mapNodes;
     std::vector<Node> m_nodes;
     std::map<int, OperationsProxyModel*> m_operations;

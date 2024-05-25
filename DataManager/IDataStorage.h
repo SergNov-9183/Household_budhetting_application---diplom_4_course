@@ -16,6 +16,7 @@ namespace DataStorage {
         virtual bool loadCategories(std::shared_ptr<Categories>& categories) = 0;
         virtual bool appendCategory(const Category& category, int& id) = 0;
         virtual bool renameCategory(const std::string& name, int id) = 0;
+        virtual bool moveCategory(int parentId, int id) = 0;
 
         virtual bool loadAccounts(std::shared_ptr<Accounts>& accounts) = 0;
         virtual bool appendAccount(const Account& account, int& id) = 0;

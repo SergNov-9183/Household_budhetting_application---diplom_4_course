@@ -9,7 +9,7 @@ include_directories(
     ${ROOT_SOURCE_DIR}/DataManager/
 )
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Core Quick Qml Gui)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Quick Qml Gui Widgets)
 
 qt_standard_project_setup()
 
@@ -55,6 +55,12 @@ qt_add_qml_module(appHomeFinance
     QML_FILES OperationsList.qml
     SOURCES OperationsModel.h OperationsModel.cpp
     SOURCES OperationsProxyModel.h OperationsProxyModel.cpp
+    QML_FILES LabelButton.qml
+    QML_FILES CategoriesPopup.qml
+    QML_FILES EditLabelWithIcon.qml
+    SOURCES AnalyticsProxyModel.h AnalyticsProxyModel.cpp
+    SOURCES
+    QML_FILES AnalyticsDateRangeSelector.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -68,7 +74,7 @@ set_target_properties(appHomeFinance PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appHomeFinance PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Gui DataManager DataStorage Common)
+target_link_libraries(appHomeFinance PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Gui Qt6::Widgets DataManager DataStorage Common)
 
 include(GNUInstallDirs)
 install(TARGETS appHomeFinance

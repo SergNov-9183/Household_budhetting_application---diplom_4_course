@@ -13,6 +13,7 @@ Item {
         anchors {
             left: parent.left
             top: parent.top
+            leftMargin: Style.radius.window + Style.margins.base
             margins: Style.margins.base
         }
         contents: stackLayout

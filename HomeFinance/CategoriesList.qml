@@ -9,6 +9,8 @@ FrameItem {
 
     property alias model: listView.model
 
+    signal clicked(int id)
+
     color: "#000000"
 
     ListView {
@@ -29,6 +31,16 @@ FrameItem {
                 nameEditor.startEditing()
             }
 
+            modelId: model.id
+            acceptDrop: categoriesModel.canDrop(drag.source ? drag.source.modelId : -1, model.id)
+
+            onItemClicked: root.clicked(model.id)
+            onDropEvent: (target) => {
+                if (target) {
+                    globalController.moveCategory(target.modelId, model.id)
+                }
+            }
+
             Repeater {
                 model: delegate.level
                 delegate: Item { implicitWidth: Style.width.shevron }
@@ -37,7 +49,7 @@ FrameItem {
             IconButton {
                 implicitWidth: Style.width.shevron
                 hideIconOnDisable: true
-                enabled: model.hasChildren
+                enabled: model.hasChildren && !delegate.dragActive
                 iconName: "Shevron-" + (model.isExpanded  ? "Down" : "Right")
                 onClicked: root.model.shevronClisked(model.id)
             }
@@ -51,7 +63,7 @@ FrameItem {
 
             IconButton {
                 implicitWidth: delegate.iconWidth
-                visible: delegate.hovered && !nameEditor.edited && delegate.level > 0
+                visible: delegate.hovered && !nameEditor.edited && delegate.level > 0 && !delegate.dragActive
                 iconName: "Rename"
                 onClicked: delegate.startEditing()
             }
@@ -59,15 +71,15 @@ FrameItem {
             IconButton {
                 implicitWidth: delegate.iconWidth
                 enabled: false
-                visible: delegate.hovered && !nameEditor.edited && delegate.level > 0
+                visible: delegate.hovered && !nameEditor.edited && delegate.level > 0 && !delegate.dragActive
                 iconName: "Remove"
             }
 
             IconButton {
                 implicitWidth: delegate.iconWidth
-                visible:  delegate.hovered && !nameEditor.edited
+                visible:  delegate.hovered && !nameEditor.edited && !delegate.dragActive
                 iconName: "Append"
-                onClicked: globalController.appendCategory(model.name, delegate.level + 1,  model.income,  model.id)
+                onClicked: globalController.appendCategory(model.name, model.income,  model.id)
             }
 
             Connections {

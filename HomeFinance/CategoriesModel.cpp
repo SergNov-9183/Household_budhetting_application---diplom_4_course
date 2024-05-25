@@ -15,6 +15,8 @@ CategoriesModel::CategoriesModel(QObject *parent)
     m_roles[ParentId]    = "parentId";
     m_roles[IsExpanded]  = "isExpanded";
     m_roles[HasChildren] = "hasChildren";
+    m_roles[Sum]         = "sum";
+    m_roles[TotalSum]    = "totalSum";
     m_allCategories->setSourceModel(this);
     m_allCategories->sort(0);
     m_incomeCategories->setSourceModel(this);
@@ -84,6 +86,10 @@ void CategoriesModel::shevronClisked(int id) {
     emit dataChanged(modelIndex, modelIndex, { IsExpanded });
 }
 
+bool CategoriesModel::isIncome(int categoryId) const {
+    return m_editorController && m_editorController->categories()->at(m_mapNodes.at(categoryId)).income;
+}
+
 int CategoriesModel::rowCount(const QModelIndex&) const {
     return m_nodes.size();
 }
@@ -102,6 +108,8 @@ QVariant CategoriesModel::data(const QModelIndex& index, int role) const {
     case ParentId:    return category(row).parentId;
     case IsExpanded:  return m_nodes[row].isExpanded;
     case HasChildren: return m_nodes[row].children.size() > 0;
+    case Sum:         return m_nodes[row].sum;
+    case TotalSum:    return m_nodes[row].totalSum;
     default:          return QVariant();
     }
 }
@@ -114,18 +122,24 @@ int CategoriesModel::defaultCategory() const {
     return m_defaultCategory;
 }
 
-void CategoriesModel::onPprojectLoaded() {
+void CategoriesModel::onProjectLoaded() {
     if (m_editorController) {
         beginResetModel();
         m_defaultCategory = 0;
+        m_incomeCategory = 0;
         m_mapNodes.clear();
         m_nodes.clear();
         auto categories = m_editorController->categories();
-        for (auto i = 0; i < categories->size(); ++i) {
-            m_nodes.push_back({ level(i) == 0 });
-            m_mapNodes[categories->at(i).id] = i;
-            if (!categories->at(i).income && categories->at(i).parentId < 1) {
-                m_defaultCategory = categories->at(i).id;
+        for (auto row = 0; row < categories->size(); ++row) {
+            m_nodes.push_back({ categories->at(row).parentId == 0 });
+            m_mapNodes[categories->at(row).id] = row;
+            if (categories->at(row).parentId < 1) {
+                if (categories->at(row).income) {
+                    m_incomeCategory = categories->at(row).id;
+                }
+                else {
+                    m_defaultCategory = categories->at(row).id;
+                }
             }
         }
         for (auto i = 0; i < m_nodes.size(); ++i) {
@@ -172,6 +186,24 @@ void CategoriesModel::onRenamed(int id) {
     emit dataChanged(modelIndex, modelIndex, { Name });
 }
 
+void CategoriesModel::onMoved(int id, int oldParentId) {
+    auto row        = m_mapNodes.at(id);
+    auto modelIndex = createIndex(row, 0);
+    emit dataChanged(modelIndex, modelIndex, { ParentId });
+    row = m_mapNodes.at(category(row).parentId);
+    m_nodes[row].children.insert(id);
+    modelIndex = createIndex(row, 0);
+    emit dataChanged(modelIndex, modelIndex, { HasChildren });
+    row = m_mapNodes.at(oldParentId);
+    if (auto child = std::find_if(m_nodes.at(row).children.begin(), m_nodes.at(row).children.end(), [id](int childId) { return childId == id; });
+        child != m_nodes.at(row).children.end()) {
+        m_nodes.at(row).children.erase(child);
+    }
+    modelIndex = createIndex(row, 0);
+    emit dataChanged(modelIndex, modelIndex, { HasChildren });
+    invalidateData();
+}
+
 EditorController* CategoriesModel::editorController() const {
     return m_editorController;
 }
@@ -203,9 +235,10 @@ bool CategoriesModel::isValidIndex(int value) const {
 
 void CategoriesModel::disconnectController() {
     if (m_editorController) {
-        disconnect(m_editorController, &EditorController::projectLoaded, this, &CategoriesModel::onPprojectLoaded);
+        disconnect(m_editorController, &EditorController::projectLoaded, this, &CategoriesModel::onProjectLoaded);
         disconnect(m_editorController, &EditorController::categoryAppended, this, &CategoriesModel::onAppended);
         disconnect(m_editorController, &EditorController::categoryRenamed, this, &CategoriesModel::onRenamed);
+        disconnect(m_editorController, &EditorController::categoryMoved, this, &CategoriesModel::onMoved);
     }
     beginResetModel();
     m_defaultCategory = 0;
@@ -216,9 +249,10 @@ void CategoriesModel::disconnectController() {
 
 void CategoriesModel::connectController() {
     if (m_editorController) {
-        connect(m_editorController, &EditorController::projectLoaded, this, &CategoriesModel::onPprojectLoaded);
+        connect(m_editorController, &EditorController::projectLoaded, this, &CategoriesModel::onProjectLoaded);
         connect(m_editorController, &EditorController::categoryAppended, this, &CategoriesModel::onAppended);
         connect(m_editorController, &EditorController::categoryRenamed, this, &CategoriesModel::onRenamed);
+        connect(m_editorController, &EditorController::categoryMoved, this, &CategoriesModel::onMoved);
     }
 }
 
@@ -228,10 +262,82 @@ void CategoriesModel::invalidateData() {
     m_expenseCategories->invalidate();
 }
 
-int CategoriesModel::level(int index) const {
-    return m_editorController->categories()->at(index).level;
+int CategoriesModel::level(int row) const {
+    int result    = 0;
+    auto parentId = category(row).parentId;
+    while (parentId > 0) {
+        ++result;
+        row = m_mapNodes.at(parentId);
+        parentId = category(row).parentId;
+    }
+    return result;
 }
 
-const Category& CategoriesModel::category(int index) const {
-    return m_editorController->categories()->at(index);
+const Category& CategoriesModel::category(int row) const {
+    return m_editorController->categories()->at(row);
+}
+
+QString CategoriesModel::getFullCategoryName(int id) const {
+    QString result;
+    while (id > 0) {
+        result = QString::fromStdString(category(m_mapNodes.at(id)).name) + result;
+        id = category(m_mapNodes.at(id)).parentId;
+        if ( id > 0) {
+            result = "/" + result;
+        }
+    }
+    return result;
+}
+
+bool CategoriesModel::canDrop(int dragAreaId, int dropAreaId) const {
+    if (dragAreaId > 1 && dropAreaId > 0 && dragAreaId != dropAreaId) {
+        auto dragAreaRow = m_mapNodes.at(dragAreaId);
+        auto dropAreaRow = m_mapNodes.at(dropAreaId);
+        if (level(dragAreaRow) != 0 &&
+            category(dropAreaRow).income == category(dragAreaRow).income &&
+            dropAreaId != category(dragAreaRow).parentId) {
+            while (dropAreaId > 0) {
+                dropAreaRow = m_mapNodes.at(dropAreaId);
+                dropAreaId  = category(dropAreaRow).parentId;
+                if (dropAreaId == dragAreaId) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+float CategoriesModel::calculateTotalSums(int id) {
+    auto totalSum = m_nodes.at(m_mapNodes.at(id)).sum;
+    for(auto childId : m_nodes.at(m_mapNodes.at(id)).children) {
+        totalSum += calculateTotalSums(childId);
+    }
+    m_nodes.at(m_mapNodes.at(id)).totalSum = totalSum;
+    return totalSum;
+}
+
+void CategoriesModel::analyzeData() {
+    if (m_editorController) {
+        std::map<int, float> sum;
+        auto operations = m_editorController->operations();
+        for (auto i = 0; i < operations->size(); ++i) {
+            auto categoryId = operations->at(i).categoryId;
+            sum[categoryId] = sum[categoryId] + operations->at(i).price;
+        }
+
+        for (const auto& item : sum) {
+            auto row = m_mapNodes.at(item.first);
+            m_nodes.at(row).sum = item.second;
+        }
+
+        calculateTotalSums(m_incomeCategory);
+        calculateTotalSums(m_defaultCategory);
+
+        auto beginModelIndex = createIndex(0, 0);
+        auto endModelIndex = createIndex(m_nodes.size() - 1, 0);
+        emit dataChanged(beginModelIndex, endModelIndex, { Sum, TotalSum });
+        emit analyzeDataComplited();
+    }
 }

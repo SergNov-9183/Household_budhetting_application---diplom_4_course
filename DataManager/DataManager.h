@@ -24,6 +24,7 @@ namespace DataManager {
 
         void appendCategory(Category category) override;
         void renameCategory(const std::string& name, int id) override;
+        void moveCategory(int parentId, int id)  override;
 
         void appendAccount(Account account) override;
         void renameAccount(const std::string& name, int id) override;

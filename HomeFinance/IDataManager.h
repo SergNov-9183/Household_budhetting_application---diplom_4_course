@@ -14,6 +14,7 @@ namespace DataManager {
         struct Listener {
             virtual void onCategoryAppend() = 0;
             virtual void onCategoryRenamed(int id) = 0;
+            virtual void onCategoryMoved(int id, int oldParentId) = 0;
 
             virtual void onAccountAppend() = 0;
             virtual void onAccountRenamed(int id) = 0;
@@ -33,6 +34,7 @@ namespace DataManager {
 
         virtual void appendCategory(Category category) = 0;
         virtual void renameCategory(const std::string& name, int id) = 0;
+        virtual void moveCategory(int parentId, int id) = 0;
 
         virtual void appendAccount(Account account) = 0;
         virtual void renameAccount(const std::string& name, int id) = 0;

@@ -10,9 +10,10 @@ namespace DataStorage {
     public:
         SqlCategories(const Database& db);
 
-        bool insert(const std::string& name, int level, int parentId = 0, bool income = false);
+        bool insert(const std::string& name, int parentId = 0, bool income = false);
         bool select(std::shared_ptr<Categories> categories);
         bool updateName(const std::string& name, int id);
+        bool move(int parentId, int id);
 
         bool create() override;
 

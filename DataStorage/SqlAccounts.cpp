@@ -51,5 +51,5 @@ bool DataStorage::SqlAccounts::create() {
 }
 
 bool DataStorage::SqlAccounts::initTable() {
-    return insert("Наличные деньги", 0) && insert("Банковские счета", 1) && insert("Дебитовые карты", 2);
+    return insert("Наличные деньги", 0) && insert("Банковские счета", 1) && insert("Дебетовые карты", 2);
 }

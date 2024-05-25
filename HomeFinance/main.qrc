@@ -38,5 +38,7 @@
         <file>Images/BankAccount.svg</file>
         <file>Images/DebitCard.svg</file>
         <file>Images/AppendOperation.svg</file>
+        <file>Images/Back.svg</file>
+        <file>Images/Back-Hover.svg</file>
     </qresource>
 </RCC>

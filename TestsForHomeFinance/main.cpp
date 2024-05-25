@@ -11,7 +11,7 @@
 #include "Database.h"
 
 static Account accountAppend = Account(-1, "testAppendAccount", 2, 2);
-static Category categoryAppened = Category(-1, "testCategoryAppened", 1, true, 1);
+static Category categoryAppened = Category(-1, "testCategoryAppened", true, 1);
 static Operation operationAppened  = Operation(-1, std::string("Simple basic description"), 2, 2, std::string("03.04.2024"), 220.99);
 
 TEST_CASE("Creating data base", "[dataManager]") {

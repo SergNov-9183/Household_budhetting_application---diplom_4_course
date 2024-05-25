@@ -88,6 +88,17 @@ void DataManager::DataManager::renameCategory(const std::string& name, int id) {
     }
 }
 
+void DataManager::DataManager::moveCategory(int parentId, int id) {
+    if (auto category = std::find_if(m_categories->begin(), m_categories->end(), [id](const Category& category) { return category.id == id; });
+        category != m_categories->end() && m_dataStorage->moveCategory(parentId, id)) {
+        auto oldParentId = category->parentId;
+        category->parentId = parentId;
+        if (m_listener) {
+            m_listener->onCategoryMoved(id, oldParentId);
+        }
+    }
+}
+
 void DataManager::DataManager::renameAccount(const std::string& name, int id) {
     if (auto account = std::find_if(m_accounts->begin(), m_accounts->end(), [id](const Account& account) { return account.id == id; });
         account != m_accounts->end() && m_dataStorage->renameAccount(name, id)) {

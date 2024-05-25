@@ -41,7 +41,6 @@ void OperationsProxyModel::setAccountId(int value) {
 
 void OperationsProxyModel::registerInModel() {
     if (auto model = qobject_cast<OperationsModel*>(sourceModel()); model && m_accountId > 0) {
-        qDebug() << "___" << m_accountId;
         model->appendProxy(this, m_accountId);
         invalidateFilter();
     }

@@ -21,7 +21,9 @@ public:
         Income,
         ParentId,
         IsExpanded,
-        HasChildren
+        HasChildren,
+        Sum,
+        TotalSum
     };
 
     explicit CategoriesModel(QObject* parent = nullptr);
@@ -31,26 +33,36 @@ public:
     void findCommonParent(int leftId, int rightId, QModelIndex& leftIndex, QModelIndex& rightIndex);
     bool isVisible(int id) const;
     void shevronClisked(int id);
+    bool isIncome(int categoryId) const;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE int defaultCategory() const;
+    Q_INVOKABLE QString getFullCategoryName(int id) const;
+    Q_INVOKABLE bool canDrop(int dragAreaId, int dropAreaId) const;
+
+public slots:
+    void analyzeData();
 
 signals:
     void editorControllerChanged(EditorController*);
     void startRename(int id);
+    void analyzeDataComplited();
 
 private slots:
-    void onPprojectLoaded();
+    void onProjectLoaded();
     void onAppended();
     void onRenamed(int id);
+    void onMoved(int id, int oldParentId);
 
 private:
     struct Node {
         bool isExpanded = false;
         std::set<int> children;
+        float sum = 0;
+        float totalSum = 0;
     };
 
     EditorController* editorController() const;
@@ -64,8 +76,9 @@ private:
     void disconnectController();
     void connectController();
     void invalidateData();
-    int level(int index) const;
-    const Category& category(int index) const;
+    int level(int row) const;
+    const Category& category(int row) const;
+    float calculateTotalSums(int id);
 
     CategoriesProxyModel* m_allCategories = nullptr;
     CategoriesProxyModel* m_incomeCategories = nullptr;
@@ -76,6 +89,7 @@ private:
     std::vector<Node> m_nodes;
     std::map<int, size_t> m_mapNodes;
     int m_defaultCategory = 0;
+    int m_incomeCategory = 0;
 };
 
 #endif // CATEGORIESMODEL_H

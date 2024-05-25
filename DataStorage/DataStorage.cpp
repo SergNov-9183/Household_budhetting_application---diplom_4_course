@@ -34,7 +34,7 @@ bool DataStorage::DataStorage::loadOperations(std::shared_ptr<Operations>& opera
 }
 
 bool DataStorage::DataStorage::appendCategory(const Category& category, int& id) {
-    if (m_categories && m_categories->insert(category.name, category.level, category.parentId, category.income)) {
+    if (m_categories && m_categories->insert(category.name, category.parentId, category.income)) {
         id = m_categories->lastId();
         return true;
     }
@@ -62,6 +62,10 @@ bool DataStorage::DataStorage::appendOperation(const Operation& operation, int& 
 
 bool DataStorage::DataStorage::renameCategory(const std::string& name, int id) {
     return m_categories && m_categories->updateName(name, id);
+}
+
+bool DataStorage::DataStorage::moveCategory(int parentId, int id) {
+    return m_categories && m_categories->move(parentId, id);
 }
 
 bool DataStorage::DataStorage::renameAccount(const std::string& name, int id) {

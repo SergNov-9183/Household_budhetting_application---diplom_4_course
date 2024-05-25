@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtQuick>
@@ -6,10 +6,13 @@
 #include "CategoriesModel.h"
 #include "AccountsModel.h"
 #include "OperationsModel.h"
+#include "AnalyticsProxyModel.h"
 
 int main(int argc, char *argv[]) {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     QScopedPointer<EditorController> editorController(new EditorController);
+
+    editorController->sendRequest();
 
     const QUrl styleUrl(u"qrc:/HomeFinance/Style.qml"_qs);
     qmlRegisterSingletonType(styleUrl, "HomeFinance", 1, 0, "Style");
@@ -19,6 +22,7 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<AccountsModel>("HomeFinance", 1, 0, "AccountsModel");
     qmlRegisterType<OperationsModel>("HomeFinance", 1, 0, "OperationsModel");
     qmlRegisterType<OperationsProxyModel>("HomeFinance", 1, 0, "OperationsProxyModel");
+    qmlRegisterType<AnalyticsProxyModel>("HomeFinance", 1, 0, "AnalyticsProxyModel");
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("globalController", editorController.data());
