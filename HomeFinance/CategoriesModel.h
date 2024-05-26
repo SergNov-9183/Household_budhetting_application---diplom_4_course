@@ -5,17 +5,7 @@
 #include <QAbstractListModel>
 #include "EditorController.h"
 #include "CategoriesProxyModel.h"
-
-namespace PeriodType {
-    Q_NAMESPACE
-    enum class Enum {
-        Year = 0,
-        Month,
-        Week,
-        Custom
-    };
-    Q_ENUM_NS(Enum)
-};
+#include "GlobalDefines.h"
 
 class CategoriesModel : public QAbstractListModel {
     Q_OBJECT

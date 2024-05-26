@@ -8,6 +8,7 @@
 
 OperationsModel::OperationsModel(QObject *parent)
     : QAbstractListModel{parent} {
+    setPeriodDates();
     m_roles = QAbstractListModel::roleNames();
     m_roles[Description] = "description";
     m_roles[Id]          = "id";
@@ -24,6 +25,12 @@ OperationsModel::~OperationsModel() {
 
 void OperationsModel::appendProxy(OperationsProxyModel *proxy, int accountId) {
     m_operations[accountId] = proxy;
+}
+
+bool OperationsModel::inRange(int id) const {
+    auto row  = m_mapNodes.at(id);
+    auto date = QDateTime::fromString(QString::fromStdString(operation(row).date)).date();
+    return date >= m_beginPeriodDate && date <= m_endPeriodDate;
 }
 
 int OperationsModel::rowCount(const QModelIndex& parent) const {
@@ -52,6 +59,16 @@ QHash<int, QByteArray> OperationsModel::roleNames() const {
     return m_roles;
 }
 
+void OperationsModel::setPeriodType(int value, const QDate &beginPeriodDate, const QDate &endPeriodDate) {
+    auto newValue = static_cast<PeriodType::Enum>(value);
+    if (m_periodType != newValue || newValue == PeriodType::Enum::Custom) {
+        m_periodType = newValue;
+        emit periodTypeChanged(value);
+        setPeriodDates(beginPeriodDate, endPeriodDate);
+        invalidateData();
+    }
+}
+
 void OperationsModel::onPprojectLoaded() {
     if (m_editorController) {
         std::map<int, float> sum;
@@ -78,7 +95,7 @@ void OperationsModel::onAppended() {
     m_mapNodes[operation.id] = index;
     m_nodes.push_back({});
     endInsertRows();
-    invalidateData(operation.accountId);
+    invalidateData();
     updateBalance();
 }
 
@@ -102,7 +119,7 @@ void OperationsModel::onRemoved(int id, int accountId) {
         }
     }
     endRemoveRows();
-    invalidateData(accountId);
+    invalidateData();
     updateBalance();
 }
 
@@ -138,6 +155,18 @@ void OperationsModel::setCategoriesModel(QAbstractListModel* value) {
     }
 }
 
+int OperationsModel::periodType() const {
+    return static_cast<int>(m_periodType);
+}
+
+QString OperationsModel::beginPeriodDate() const {
+    return m_beginPeriodDate.toString("dd.MM.yyyy");
+}
+
+QString OperationsModel::endPeriodDate() const {
+    return m_endPeriodDate.toString("dd.MM.yyyy");
+}
+
 bool OperationsModel::isValidIndex(int value) const {
     return value >= 0 && value < m_nodes.size();
 }
@@ -168,7 +197,7 @@ void OperationsModel::connectController() {
     }
 }
 
-void OperationsModel::invalidateData(int accountId) {
+void OperationsModel::invalidateData() {
     for (auto proxy : m_operations) {
         proxy.second->invalidateData();
     }
@@ -206,4 +235,26 @@ void OperationsModel::updateCategories() {
     auto beginModelIndex = createIndex(0, 0);
     auto endModelIndex = createIndex(m_nodes.size() - 1, 0);
     emit dataChanged(beginModelIndex, endModelIndex, { CategoryId });
+}
+
+void OperationsModel::setPeriodDates(const QDate& beginPeriodDate, const QDate& endPeriodDate) {
+    auto date = QDate::currentDate();
+    if (m_periodType == PeriodType::Enum::Year) {
+        m_beginPeriodDate = QDate(date.year(), 1, 1);
+        m_endPeriodDate   = QDate(date.year(), 12, 31);
+    }
+    else if (m_periodType == PeriodType::Enum::Month) {
+        m_beginPeriodDate = QDate(date.year(), date.month(), 1);
+        m_endPeriodDate   = QDate(date.year(), date.month(), date.daysInMonth());
+    }
+    else if (m_periodType == PeriodType::Enum::Week) {
+        m_beginPeriodDate = date.addDays(-date.dayOfWeek() + 1);
+        m_endPeriodDate   = m_beginPeriodDate.addDays(6);
+    }
+    else {
+        m_beginPeriodDate = beginPeriodDate;
+        m_endPeriodDate   = endPeriodDate;
+    }
+    emit beginPeriodDateChanged(m_beginPeriodDate.toString("dd.MM.yyyy"));
+    emit endPeriodDateChanged(m_endPeriodDate.toString("dd.MM.yyyy"));
 }

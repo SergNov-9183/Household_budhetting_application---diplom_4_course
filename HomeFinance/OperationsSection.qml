@@ -8,6 +8,11 @@ Item {
     Layout.fillHeight: true
     Layout.fillWidth: true
 
+    PeriodPicker {
+        id: periodPicker
+        onClicked: (periodType) => operationsModel.setPeriodType(periodType, periodPicker.beginDate, periodPicker.endDate)
+    }
+
     TabsRow {
         id: accountsTabs
         anchors {
@@ -62,6 +67,11 @@ Item {
                 left: parent.left
                 right: parent.right
                 margins: Style.margins.base
+            }
+
+            TextButton {
+                text: periodPicker.getPeriodName(operationsModel.periodType) + ": " + operationsModel.beginPeriodDate + " - " + operationsModel.endPeriodDate
+                onClicked: periodPicker.show(mapToItem(root, 0, 0))
             }
 
             Item { Layout.fillWidth: true }

@@ -60,6 +60,7 @@ qt_add_qml_module(appHomeFinance
     QML_FILES EditLabelWithIcon.qml
     SOURCES AnalyticsProxyModel.h AnalyticsProxyModel.cpp
     QML_FILES PeriodPicker.qml
+    SOURCES GlobalDefines.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

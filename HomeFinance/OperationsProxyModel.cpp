@@ -11,8 +11,13 @@ void OperationsProxyModel::invalidateData() {
 }
 
 bool OperationsProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const {
-    auto index  = sourceModel()->index(source_row, 0);
-    return sourceModel()->data(index, OperationsModel::OperationsRoles::AccountId).toInt() == m_accountId;
+    auto index   = sourceModel()->index(source_row, 0);
+    auto id      = sourceModel()->data(index, OperationsModel::OperationsRoles::Id).toInt();
+    bool inRange = true;
+    if (auto model = qobject_cast<OperationsModel*>(sourceModel())) {
+        inRange = model->inRange(id);
+    }
+    return inRange && sourceModel()->data(index, OperationsModel::OperationsRoles::AccountId).toInt() == m_accountId;
 }
 
 QAbstractListModel* OperationsProxyModel::model() {
