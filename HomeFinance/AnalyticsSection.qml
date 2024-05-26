@@ -52,7 +52,7 @@ Item {
 
     PeriodPicker {
         id: periodPicker
-        onClicked: (periodType) => categoriesModel.setPeriodType(periodType)
+        onClicked: (periodType) => categoriesModel.setPeriodType(periodType, periodPicker.beginDate, periodPicker.endDate)
     }
 
     Image {
@@ -216,7 +216,7 @@ Item {
             }
 
             TextButton {
-                text: periodPicker.getPeriodName(categoriesModel.periodType)
+                text: periodPicker.getPeriodName(categoriesModel.periodType) + ": " + categoriesModel.beginPeriodDate + " - " + categoriesModel.endPeriodDate
                 onClicked: periodPicker.show(mapToItem(root, 0, 0))
             }
 

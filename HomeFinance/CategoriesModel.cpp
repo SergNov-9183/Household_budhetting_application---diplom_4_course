@@ -234,6 +234,14 @@ int CategoriesModel::periodType() const {
     return static_cast<int>(m_periodType);
 }
 
+QString CategoriesModel::beginPeriodDate() const {
+    return m_beginPeriodDate.toString("dd.MM.yyyy");
+}
+
+QString CategoriesModel::endPeriodDate() const {
+    return m_endPeriodDate.toString("dd.MM.yyyy");
+}
+
 bool CategoriesModel::isValidIndex(int value) const {
     return value >= 0 && value < m_nodes.size();
 }
@@ -323,20 +331,26 @@ float CategoriesModel::calculateTotalSums(int id) {
     return totalSum;
 }
 
-void CategoriesModel::setPeriodDates() {
+void CategoriesModel::setPeriodDates(const QDate& beginPeriodDate, const QDate& endPeriodDate) {
     auto date = QDate::currentDate();
     if (m_periodType == PeriodType::Enum::Year) {
         m_beginPeriodDate = QDate(date.year(), 1, 1);
-        m_endPeriodDate = QDate(date.year(), 12, 31);
+        m_endPeriodDate   = QDate(date.year(), 12, 31);
     }
     else if (m_periodType == PeriodType::Enum::Month) {
         m_beginPeriodDate = QDate(date.year(), date.month(), 1);
-        m_endPeriodDate = QDate(date.year(), date.month(), date.daysInMonth());
+        m_endPeriodDate   = QDate(date.year(), date.month(), date.daysInMonth());
+    }
+    else if (m_periodType == PeriodType::Enum::Week) {
+        m_beginPeriodDate = date.addDays(-date.dayOfWeek() + 1);
+        m_endPeriodDate   = m_beginPeriodDate.addDays(6);
     }
     else {
-        m_beginPeriodDate = date.addDays(-date.dayOfWeek() + 1);
-        m_endPeriodDate = m_beginPeriodDate.addDays(6);
+        m_beginPeriodDate = beginPeriodDate;
+        m_endPeriodDate   = endPeriodDate;
     }
+    emit beginPeriodDateChanged(m_beginPeriodDate.toString("dd.MM.yyyy"));
+    emit endPeriodDateChanged(m_endPeriodDate.toString("dd.MM.yyyy"));
 }
 
 void CategoriesModel::analyzeData() {
@@ -370,12 +384,12 @@ void CategoriesModel::analyzeData() {
     }
 }
 
-void CategoriesModel::setPeriodType(int value) {
+void CategoriesModel::setPeriodType(int value, const QDate& beginPeriodDate, const QDate& endPeriodDate) {
     auto newValue = static_cast<PeriodType::Enum>(value);
-    if (m_periodType != newValue) {
+    if (m_periodType != newValue || newValue == PeriodType::Enum::Custom) {
         m_periodType = newValue;
         emit periodTypeChanged(value);
-        setPeriodDates();
+        setPeriodDates(beginPeriodDate, endPeriodDate);
         analyzeData();
     }
 }

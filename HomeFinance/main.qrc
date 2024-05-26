@@ -40,5 +40,7 @@
         <file>Images/AppendOperation.svg</file>
         <file>Images/Back.svg</file>
         <file>Images/Back-Hover.svg</file>
+        <file>Images/Forward.svg</file>
+        <file>Images/Forward-Hover.svg</file>
     </qresource>
 </RCC>

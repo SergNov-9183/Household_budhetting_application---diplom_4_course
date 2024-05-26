@@ -24,6 +24,8 @@ class CategoriesModel : public QAbstractListModel {
     Q_PROPERTY(QSortFilterProxyModel* incomeCategories READ incomeCategories CONSTANT)
     Q_PROPERTY(QSortFilterProxyModel* expenseCategories READ expenseCategories CONSTANT)
     Q_PROPERTY(int periodType READ periodType NOTIFY periodTypeChanged)
+    Q_PROPERTY(QString beginPeriodDate READ beginPeriodDate NOTIFY beginPeriodDateChanged)
+    Q_PROPERTY(QString endPeriodDate READ endPeriodDate NOTIFY endPeriodDateChanged)
 
 public:
     enum CategoriesRoles {
@@ -57,11 +59,13 @@ public:
 
 public slots:
     void analyzeData();
-    void setPeriodType(int value);
+    void setPeriodType(int value, const QDate& beginPeriodDate = QDate(), const QDate& endPeriodDate = QDate());
 
 signals:
     void editorControllerChanged(EditorController*);
     void periodTypeChanged(int);
+    void beginPeriodDateChanged(const QString&);
+    void endPeriodDateChanged(const QString&);
     void startRename(int id);
     void analyzeDataComplited();
 
@@ -87,6 +91,8 @@ private:
     QSortFilterProxyModel* expenseCategories() const;
 
     int periodType() const;
+    QString beginPeriodDate() const;
+    QString endPeriodDate() const;
 
     bool isValidIndex(int value) const;
     void disconnectController();
@@ -95,7 +101,7 @@ private:
     int level(int row) const;
     const Category& category(int row) const;
     float calculateTotalSums(int id);
-    void setPeriodDates();
+    void setPeriodDates(const QDate& beginPeriodDate = QDate(), const QDate& endPeriodDate = QDate());
 
     CategoriesProxyModel* m_allCategories = nullptr;
     CategoriesProxyModel* m_incomeCategories = nullptr;
