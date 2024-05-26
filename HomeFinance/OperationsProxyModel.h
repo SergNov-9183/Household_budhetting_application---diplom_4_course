@@ -3,20 +3,20 @@
 
 #include <QSortFilterProxyModel>
 #include <QAbstractListModel>
+#include "GlobalDefines.h"
 
-class OperationsProxyModel : public QSortFilterProxyModel {
+class OperationsProxyModel : public QSortFilterProxyModel, public IInvalidateFilter {
     Q_OBJECT
     Q_PROPERTY(QAbstractListModel* model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(int accountId READ accountId WRITE setAccountId NOTIFY accountIdChanged FINAL)
 public:
     explicit OperationsProxyModel(QObject* parent = nullptr);
 
+    void invalidateData() override;
+
 signals:
     void modelChanged(QAbstractListModel*);
     void accountIdChanged(int);
-
-public slots:
-    void invalidateData();
 
 protected:
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;

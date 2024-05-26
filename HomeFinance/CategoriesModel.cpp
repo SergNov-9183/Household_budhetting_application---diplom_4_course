@@ -91,6 +91,14 @@ bool CategoriesModel::isIncome(int categoryId) const {
     return m_editorController && m_editorController->categories()->at(m_mapNodes.at(categoryId)).income;
 }
 
+QDate CategoriesModel::beginDate() const {
+    return m_beginPeriodDate;
+}
+
+QDate CategoriesModel::endDate() const {
+    return m_endPeriodDate;
+}
+
 int CategoriesModel::rowCount(const QModelIndex&) const {
     return m_nodes.size();
 }
@@ -388,8 +396,8 @@ void CategoriesModel::setPeriodType(int value, const QDate& beginPeriodDate, con
     auto newValue = static_cast<PeriodType::Enum>(value);
     if (m_periodType != newValue || newValue == PeriodType::Enum::Custom) {
         m_periodType = newValue;
-        emit periodTypeChanged(value);
         setPeriodDates(beginPeriodDate, endPeriodDate);
+        emit periodTypeChanged(value);
         analyzeData();
     }
 }

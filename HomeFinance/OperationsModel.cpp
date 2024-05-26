@@ -3,7 +3,6 @@
 #include <QDateTime>
 #include <QTimer>
 
-#include "OperationsProxyModel.h"
 #include "CategoriesModel.h"
 
 OperationsModel::OperationsModel(QObject *parent)
@@ -23,7 +22,7 @@ OperationsModel::~OperationsModel() {
     disconnectController();
 }
 
-void OperationsModel::appendProxy(OperationsProxyModel *proxy, int accountId) {
+void OperationsModel::appendProxy(IInvalidateFilter* proxy, int accountId) {
     m_operations[accountId] = proxy;
 }
 
@@ -31,6 +30,12 @@ bool OperationsModel::inRange(int id) const {
     auto row  = m_mapNodes.at(id);
     auto date = QDateTime::fromString(QString::fromStdString(operation(row).date)).date();
     return date >= m_beginPeriodDate && date <= m_endPeriodDate;
+}
+
+bool OperationsModel::inRange(int id, const QDate& beginPeriodDate, const QDate& endPeriodDate) const {
+    auto row  = m_mapNodes.at(id);
+    auto date = QDateTime::fromString(QString::fromStdString(operation(row).date)).date();
+    return date >= beginPeriodDate && date <= endPeriodDate;
 }
 
 int OperationsModel::rowCount(const QModelIndex& parent) const {

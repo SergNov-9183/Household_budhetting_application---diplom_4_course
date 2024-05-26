@@ -7,6 +7,7 @@ class AnalyticsProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
     Q_PROPERTY(QAbstractListModel* model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(int currentCategory READ currentCategory WRITE setCurrentCategory NOTIFY currentCategoryChanged)
+
 public:
     explicit AnalyticsProxyModel(QObject *parent = nullptr);
 
@@ -26,7 +27,6 @@ private:
     void setCurrentCategory(int value);
 
     int m_currentCategory = 0;
-
 };
 
 #endif // ANALYTICSPROXYMODEL_H

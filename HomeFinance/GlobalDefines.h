@@ -14,4 +14,8 @@ namespace PeriodType {
     Q_ENUM_NS(Enum)
 };
 
+struct IInvalidateFilter {
+    virtual void invalidateData() = 0;
+};
+
 #endif // GLOBALDEFINES_H

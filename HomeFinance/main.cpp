@@ -3,10 +3,12 @@
 #include <QQmlContext>
 #include <QtQuick>
 
-#include "CategoriesModel.h"
 #include "AccountsModel.h"
-#include "OperationsModel.h"
 #include "AnalyticsProxyModel.h"
+#include "CategoriesModel.h"
+#include "OperationsModel.h"
+#include "OperationsProxyModel.h"
+#include "PriceAnalyticsProxyModel.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -25,6 +27,7 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<OperationsModel>("HomeFinance", 1, 0, "OperationsModel");
     qmlRegisterType<OperationsProxyModel>("HomeFinance", 1, 0, "OperationsProxyModel");
     qmlRegisterType<AnalyticsProxyModel>("HomeFinance", 1, 0, "AnalyticsProxyModel");
+    qmlRegisterType<PriceAnalyticsProxyModel>("HomeFinance", 1, 0, "PriceAnalyticsProxyModel");
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("globalController", editorController.data());

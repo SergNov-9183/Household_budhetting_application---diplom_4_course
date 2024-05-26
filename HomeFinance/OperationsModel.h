@@ -1,13 +1,10 @@
 #ifndef OPERATIONSMODEL_H
 #define OPERATIONSMODEL_H
 
-//#include <set>
 #include <QAbstractListModel>
 #include "EditorController.h"
-#include "OperationsProxyModel.h"
 #include "GlobalDefines.h"
 
-class OperationsProxyModel;
 class OperationsModel : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(EditorController* editorController READ editorController WRITE setEditorController NOTIFY editorControllerChanged)
@@ -34,8 +31,9 @@ public:
     void findCommonParent(int leftId, int rightId, QModelIndex& leftIndex, QModelIndex& rightIndex);
     bool isVisible(int id) const;
     void shevronClisked(int id);
-    void appendProxy(OperationsProxyModel* proxy, int accountId);
+    void appendProxy(IInvalidateFilter* proxy, int accountId);
     bool inRange(int id) const;
+    bool inRange(int id, const QDate& beginPeriodDate, const QDate& endPeriodDate) const;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -93,7 +91,7 @@ private:
 
     std::map<int, size_t> m_mapNodes;
     std::vector<Node> m_nodes;
-    std::map<int, OperationsProxyModel*> m_operations;
+    std::map<int, IInvalidateFilter*> m_operations;
     QDate m_beginPeriodDate;
     QDate m_endPeriodDate;
 };

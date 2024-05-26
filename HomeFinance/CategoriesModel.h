@@ -38,6 +38,8 @@ public:
     bool isVisible(int id) const;
     void shevronClisked(int id);
     bool isIncome(int categoryId) const;
+    QDate beginDate() const;
+    QDate endDate() const;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
