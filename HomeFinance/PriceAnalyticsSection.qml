@@ -190,7 +190,7 @@ Item {
                             horizontalCenter: parent.horizontalCenter
                             margins: Style.margins.base
                         }
-                        visible: implicitWidth + 2 * Style.margins.base < barDelegate.width && implicitHeight + 2 * Style.margins.base < barDelegate.height
+                        visible: implicitWidth + 2 * Style.width.border < barDelegate.width && implicitHeight + 2 * Style.margins.base < barDelegate.height
                         text: model.price.toFixed(2).replace(".", ",")
                     }
 
@@ -200,7 +200,7 @@ Item {
                             horizontalCenter: parent.horizontalCenter
                             margins: Style.margins.base
                         }
-                        visible: implicitWidth + 2 * Style.margins.base < barDelegate.width
+                        visible: implicitWidth + 2 * Style.width.border < barCanvas.stepX
                         text: model.date
                     }
 
